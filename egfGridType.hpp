@@ -7,10 +7,8 @@
 
 
 #include <vtkUnstructuredGrid.h>
-#include <vtkUnstructuredGridReader.h>
 
 struct egfGridType {
-    vtkUnstructuredGridReader* reader;
     vtkUnstructuredGrid* ugrid;
 };
 

@@ -1,4 +1,5 @@
 #include "egfGridType.hpp"
+#include <vtkUnstructuredGridReader.h>
 #include <vtkUnstructuredGridWriter.h>
 #include <vtkSmartPointer.h>
 #include <iostream>
@@ -7,14 +8,12 @@ extern "C" {
 
 int egfGrid_new(egfGridType** self) {
 	(*self) = new egfGridType();
-	(*self)->reader = vtkUnstructuredGridReader::New();
 	(*self)->ugrid = vtkUnstructuredGrid::New();
 	return 0;
 }
 
 int egfGrid_del(egfGridType** self) {
 	(*self)->ugrid->Delete();
-	(*self)->reader->Delete();
 	delete *self;
     return 0;
 }
@@ -44,26 +43,26 @@ int egfGrid_print(egfGridType** self) {
 }
 
 int egfGrid_loadFromFile(egfGridType** self, const char* filename) {
-    (*self)->reader->SetFileName(filename);
-    (*self)->reader->Update();
+    vtkSmartPointer<vtkUnstructuredGridReader> reader = vtkSmartPointer<vtkUnstructuredGridReader>::New();
+    reader->SetFileName(filename);
+    reader->Update();
 #if (VTK_MAJOR_VERSION < 6)
-    (*self)->ugrid = (*self)->reader->GetOutput();
+    (*self)->ugrid->DeepCopy(reader->GetOutput());
 #else
-    (*self)->ugrid = (*self)->reader->GetOutputData();
+    (*self)->ugrid->DeepCopy(reader->GetOutputData());
 #endif
 	return 0;
 }
 
 int egfGrid_saveToFile(egfGridType** self, const char* filename) {
-	vtkUnstructuredGridWriter* writer = vtkUnstructuredGridWriter::New();
+    vtkSmartPointer<vtkUnstructuredGridWriter> writer = vtkSmartPointer<vtkUnstructuredGridWriter>::New();
     writer->SetFileName(filename);
-    writer->Update();
 #if (VTK_MAJOR_VERSION < 6)
     writer->SetInput((*self)->ugrid);
 #else
     writer->SetInputData((*self)->ugrid);
 #endif
-	writer->Delete();
+    writer->Update();
 	return 0;
 }
 
