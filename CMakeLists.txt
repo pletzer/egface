@@ -28,5 +28,7 @@ enable_testing()
 add_test(NAME testGrid
          COMMAND "${PYTHON_EXECUTABLE}" 
          "${CMAKE_SOURCE_DIR}/tests/testGrid.py"
-         --build_dir ${CMAKE_BINARY_DIR})
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/ugrid2d.vtk"
+         --output "testGrid.vtk")
 
