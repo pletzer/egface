@@ -26,5 +26,7 @@ enable_testing()
 # class tests
 #
 add_test(NAME testGrid
-         COMMAND "${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/testGrid.py")
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testGrid.py"
+         --build_dir ${CMAKE_BINARY_DIR})
 

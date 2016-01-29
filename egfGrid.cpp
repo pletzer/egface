@@ -27,15 +27,17 @@ int egfGrid_loadFromFile(egfGridType** self, const char* filename) {
 	return 0;
 }
 
-int egfGrid_saveToFile(egfGridType** self, const char* filename);
+int egfGrid_saveToFile(egfGridType** self, const char* filename) {
 	vtkUnstructuredGridWriter* writer = vtkUnstructuredGridWriter::New();
     writer->SetFileName(filename);
+    writer->Update();
 #if (VTK_MAJOR_VERSION < 6)
     writer->SetInput((*self)->ugrid);
 #else
     writer->SetInputData((*self)->ugrid);
 #endif
-    writer->Update();
 	writer->Delete();
 	return 0;
 }
+
+} // extern "C"
