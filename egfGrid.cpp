@@ -1,29 +1,41 @@
-#include <egfGrid.hpp>
+#include "egfGridType.hpp"
 #include <vtkUnstructuredGridReader.h>
 #include <vtkUnstructuredGridWriter.h>
 
 extern "C" {
 
-int egfGrid_new(vtkUnstructuredGrid** self) {
+int egfGrid_new(egfGridType** self) {
 	(*self) = new egfGridType();
+	return 0;
 }
 
-int egfGrid_del(vtkUnstructuredGrid** self) {
-	delete *self);
+int egfGrid_del(egfGridType** self) {
+	delete *self;
+    return 0;
 }
 
-int egfGrid_loadFromFile(vtkUnstructuredGrid** self, const char* filename) {
-	vtkUnstructuredGridReader* reader = vtkPolyDataReader::New();
+int egfGrid_loadFromFile(egfGridType** self, const char* filename) {
+	vtkUnstructuredGridReader* reader = vtkUnstructuredGridReader::New();
     reader->SetFileName(filename);
     reader->Update();
+#if (VTK_MAJOR_VERSION < 6)
+    (*self)->ugrid = reader->GetOutput();
+#else
     (*self)->ugrid = reader->GetOutputData();
+#endif
 	reader->Delete();
+	return 0;
 }
 
-int egfGrid_saveToFile(vtkUnstructuredGrid** self, const char* filename);
-	vtkUnstructuredGridWriter* writer = vtkPolyDataWriter::New();
+int egfGrid_saveToFile(egfGridType** self, const char* filename);
+	vtkUnstructuredGridWriter* writer = vtkUnstructuredGridWriter::New();
     writer->SetFileName(filename);
+#if (VTK_MAJOR_VERSION < 6)
+    writer->SetInput((*self)->ugrid);
+#else
     writer->SetInputData((*self)->ugrid);
+#endif
     writer->Update();
 	writer->Delete();
+	return 0;
 }

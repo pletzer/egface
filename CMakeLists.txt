@@ -14,8 +14,10 @@ if (NOT ERROR_NUMPY STREQUAL "")
   message(FATAL_ERROR "You must have python-numpy installed!")
 endif()
 
+include(${VTK_USE_FILE})
 add_library(egface SHARED
             egfGrid.cpp)
+target_link_libraries(egface ${VTK_LIBRARIES})
 
 # enable ctest
 enable_testing()
