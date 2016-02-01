@@ -37,4 +37,4 @@ add_test(NAME testCellLocator
          COMMAND "${PYTHON_EXECUTABLE}" 
          "${CMAKE_SOURCE_DIR}/tests/testCellLocator.py"
          --build_dir ${CMAKE_BINARY_DIR}
-         --input "${CMAKE_SOURCE_DIR}/data/mesh_smag_0040.vtk")
+         --input "${CMAKE_SOURCE_DIR}/data/ugrid2d.vtk")

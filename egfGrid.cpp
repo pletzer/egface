@@ -77,4 +77,16 @@ int egfGrid_saveToFile(egfGridType** self, const char* filename) {
  	return 0; 	
  }
 
+ int egfGrid_getDomainBounds(egfGridType** self, double* posMin, double* posMax) {
+    (*self)->ugrid->GetPoints()->ComputeBounds();
+    double* bbox = (*self)->ugrid->GetPoints()->GetBounds();
+    posMin[0] = bbox[0];
+    posMax[0] = bbox[1];
+    posMin[1] = bbox[2];
+    posMax[1] = bbox[3];
+    posMin[2] = bbox[4];
+    posMax[2] = bbox[5];
+    return 0;
+ }
+
 } // extern "C"

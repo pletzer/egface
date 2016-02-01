@@ -67,6 +67,15 @@ int egfGrid_saveToFile(egfGridType** self, const char* filename);
  */
  int egfGrid_getNumberOfPoints(egfGridType** self, int* numPoints);
 
+/**
+ * Get the domain bounds
+ * @param self handle
+ * @param posMin lower box point (output)
+ * @param posMin upper box point (output)
+ * @return 0 upon success
+ */
+ int egfGrid_getDomainBounds(egfGridType** self, double* posMin, double* posMax);
+
 }
 
 #endif // EGF_GRID
