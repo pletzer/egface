@@ -2,6 +2,7 @@
 #include <vtkUnstructuredGridReader.h>
 #include <vtkUnstructuredGridWriter.h>
 #include <vtkSmartPointer.h>
+#include <vtkIdList.h>
 #include <iostream>
 
 extern "C" {

@@ -16,7 +16,8 @@ endif()
 
 include(${VTK_USE_FILE})
 add_library(egface SHARED
-            egfGrid.cpp)
+            egfGrid.cpp
+            egfCellLocator.cpp)
 target_link_libraries(egface ${VTK_LIBRARIES})
 
 # enable ctest
@@ -32,3 +33,8 @@ add_test(NAME testGrid
          --input "${CMAKE_SOURCE_DIR}/data/ugrid2d.vtk"
          --output "testGrid.vtk")
 
+add_test(NAME testCellLocator
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testCellLocator.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/mesh_smag_0040.vtk")
