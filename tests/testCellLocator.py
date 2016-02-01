@@ -41,11 +41,16 @@ ier = lib.egfCellLocator_setNumberOfCellsPerBucket(byref(locator), 20)
 assert ier == 0
 
 # Find the cell within a box
+domMin = (3*c_double)(0, 0, 0)
+domMax = (3*c_double)(0, 0, 0)
+ier = lib.egfGrid_getDomainBounds(byref(grid), domMin, domMax)
 posMin = (3*c_double)(0, 0, 0)
 posMax = (3*c_double)(0, 0, 0)
-ier = lib.egfGrid_getDomainBounds(byref(grid), posMin, posMax)
 for i in range(3):
-    print '{} min/max box coordinates: {}/{}'.format(i, posMin[i], posMax[i])
+    posMin[i] = domMin[i] + 0.55*(domMax[i] - domMin[i])
+    posMax[i] = domMin[i] + 0.65*(domMax[i] - domMin[i])
+    print '{} min/max domain: {}/{} box: {}/{}'.format(i, 
+        domMin[i], domMax[i], posMin[i], posMax[i])
 ier = lib.egfCellLocator_findCellsInBox(byref(locator), posMin, posMax)
 assert ier == 0
 
