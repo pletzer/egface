@@ -40,7 +40,7 @@ int egfPointIntersector_del(egfPointIntersectorType** self);
  int egfPointIntersector_print(egfPointIntersectorType** self);
 
 /**
- * Load from file
+ * Set grid
  * @param self handle
  * @param grid unstructured grid instance
  * @return 0 upon success
@@ -48,9 +48,9 @@ int egfPointIntersector_del(egfPointIntersectorType** self);
 int egfPointIntersector_setGrid(egfPointIntersectorType** self, egfGridType* grid);
 
 /**
- * Load from file
+ * Set tolerance
  * @param self handle
- * @param grid unstructured grid instance
+ * @param tol tolerance
  * @return 0 upon success
  */
 int egfPointIntersector_setTolerance(egfPointIntersectorType** self, double tol);
@@ -63,8 +63,9 @@ int egfPointIntersector_setTolerance(egfPointIntersectorType** self, double tol)
  * @param p2 third tetrahedron vertex
  * @return 0 upon success
  */
- int egfPointIntersector_withLine(egfPointIntersectorType** self, 
- 	                              const double p0[], const double p1[]); 
+ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self, 
+ 	                                  const double p0[],
+ 	                                  const double p1[]); 
 
 /**
  * Find grid points intersecting with triangle
@@ -74,8 +75,10 @@ int egfPointIntersector_setTolerance(egfPointIntersectorType** self, double tol)
  * @param p2 third tetrahedron vertex
  * @return 0 upon success
  */
- int egfPointIntersector_withTriangle(egfPointIntersectorType** self, 
- 	                                  const double p0[], const double p1[], const double p2[]); 
+ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self, 
+ 	                                      const double p0[],
+ 	                                      const double p1[],
+ 	                                      const double p2[]); 
 
 /**
  * Find grid points intersecting with tetrahedron
@@ -86,8 +89,11 @@ int egfPointIntersector_setTolerance(egfPointIntersectorType** self, double tol)
  * @param p3 fourth tetrahedron vertex
  * @return 0 upon success
  */
- int egfPointIntersector_withTetrahedron(egfPointIntersectorType** self, 
- 	                                     const double p0[], const double p1[], const double p2[], const double p3[]); 
+ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self, 
+ 	                                     	 const double p0[],
+ 	                                     	 const double p1[],
+ 	                                     	 const double p2[],
+ 	                                     	 const double p3[]); 
 
 /**
  * Get number of points found

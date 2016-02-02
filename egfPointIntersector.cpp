@@ -41,22 +41,28 @@ int egfPointIntersector_print(egfPointIntersectorType** self) {
 int egfPointIntersector_setGrid(egfPointIntersectorType** self, egfGridType* grid) {
     (*self)->ugrid = grid->ugrid;
     (*self)->cellLocator->SetDataSet(grid->ugrid);
+    (*self)->cellLocator->BuildLocator();
     return 0;
 }
 
- int egfPointIntersector_getNumberOfPoints(egfPointIntersectorType** self, int* numPoints) {
+int egfPointIntersector_getNumberOfPoints(egfPointIntersectorType** self, int* numPoints) {
     *numPoints = (int) (*self)->intersectPoints.size();
     return 0;
- }
+}
 
- int egfPointIntersector_fillInPoints(egfPointIntersectorType** self, double* points) {
+int egfPointIntersector_fillInPoints(egfPointIntersectorType** self, double* points) {
     for (size_t i = 0; i < (*self)->intersectPoints.size(); ++i) {
         for (size_t j = 0; j < 3; ++j) {
             points[i*3 + j] = (*self)->intersectPoints[i][j];
         }
     }
     return 0;
- } 
+}
+
+int egfPointIntersector_setTolerance(egfPointIntersectorType** self, double tol) {
+    (*self)->tol = tol;
+    return 0;
+}
 
 int egfPointIntersector_gridWithLine(egfPointIntersectorType** self, 
                                      const double p0[], 

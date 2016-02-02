@@ -39,3 +39,36 @@ add_test(NAME testCellLocator
          "${CMAKE_SOURCE_DIR}/tests/testCellLocator.py"
          --build_dir ${CMAKE_BINARY_DIR}
          --input "${CMAKE_SOURCE_DIR}/data/rbc_001.vtk")
+
+add_test(NAME testPointIntersectorLineNoIntersection
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorLine.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/ugridex.vtk"
+         --p0 "-1, -1, 0" --p1 "-2, -3, 0"
+         )
+
+add_test(NAME testPointIntersectorLine2
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorLine.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/ugridex.vtk"
+         --p0 "1, 0.5, -1" --p1 "1, 0.5, 7"
+         )
+
+add_test(NAME testPointIntersectorLineMarginal
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorLine.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/ugridex.vtk"
+         --p0 "1, 0.5, 0" --p1 "1, 0.5, 6"
+         )
+
+add_test(NAME testPointIntersectorLineInside
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorLine.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/ugridex.vtk"
+         --p0 "1, 0.5, 0.001" --p1 "1, 0.5, 5.999"
+         )
+

@@ -2,7 +2,7 @@ import argparse
 import os
 from ctypes import cdll, POINTER, byref, c_void_p, c_double, c_long, c_int
 
-parser = argparse.ArgumentParser(description='Translate shape.')
+parser = argparse.ArgumentParser(description='Test grid.')
 
 parser.add_argument('--build_dir', dest='build_dir', default='./',
                     help='Specify build directory')
