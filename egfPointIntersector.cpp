@@ -61,6 +61,62 @@ int egfPointIntersector_setGrid(egfPointIntersectorType** self, egfGridType* gri
 int egfPointIntersector_gridWithLine(egfPointIntersectorType** self, 
                                      const double p0[], 
                                      const double p1[]) {
+
+    // VTK does nto enforce const'ness
+    std::vector<double> pa(p0, p0 + 4);
+    std::vector<double> pb(p1, p1 + 4);
+
+    // Construct triangle by building a one cell unstructured grid
+    vtkUnstructuredGrid* ug = vtkUnstructuredGrid::New();
+    vtkPoints* points = vtkPoints::New();
+    points->SetNumberOfPoints(2);
+    points->SetPoint(0, p0);
+    points->SetPoint(1, p1);
+    ug->SetPoints(points);
+    ug->Allocate(1, 1);
+    vtkIdList* ptIds = vtkIdList::New();
+    ptIds->SetNumberOfIds(2);
+    for (vtkIdType i = 0; i < 2; ++i) {
+        ptIds->SetId(i, i);
+    }
+    ug->InsertNextCell(VTK_LINE, ptIds);
+    ptIds->Delete();
+
+    // Find the cells along the line
+    vtkIdList* cellIds = vtkIdList::New();
+    (*self)->cellLocator->FindCellsAlongLine(&pa[0], &pb[0], (*self)->tol, cellIds);
+    if (cellIds->GetNumberOfIds() == 0) {
+        // No intersection
+        return 0;
+    }
+
+    // Compute the intersection between each grid cell face with the segment
+    double t; // parametric position along the line
+    std::vector<double> pt(3); // intersection point
+    double pcoords[] = {0, 0, 0}; // tetrahedron parametric coordinates
+    int subId; // not used
+    // Iterate over the grid cells along the segment
+    for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
+        vtkCell* cell = (*self)->ugrid->GetCell(cellIds->GetId(j));
+        int numFaces = cell->GetNumberOfFaces();
+        for (int k = 0; k < numFaces; ++k) {
+            vtkCell* face = cell->GetFace(k);
+            int res = face->IntersectWithLine(&pa[0], &pb[0], (*self)->tol, t, &pt.front(), pcoords, subId);
+            if (res) {
+                (*self)->intersectPoints.push_back(pt);
+            }
+        }
+    }
+
+    // Add the segment's vertices
+    (*self)->intersectPoints.push_back(std::vector<double>(p0, p0 + 4));
+    (*self)->intersectPoints.push_back(std::vector<double>(p1, p1 + 4));
+
+    // Clean up
+    cellIds->Delete();
+    points->Delete();
+    ug->Delete();
+
     return 0;
 }
 
@@ -68,6 +124,112 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
                                          const double p0[], 
                                          const double p1[], 
                                          const double p2[]) {
+
+    // Construct triangle by building a one cell unstructured grid
+    vtkUnstructuredGrid* ug = vtkUnstructuredGrid::New();
+    vtkPoints* points = vtkPoints::New();
+    points->SetNumberOfPoints(3);
+    points->SetPoint(0, p0);
+    points->SetPoint(1, p1);
+    points->SetPoint(2, p2);
+    ug->SetPoints(points);
+    ug->Allocate(1, 1);
+    vtkIdList* ptIds = vtkIdList::New();
+    ptIds->SetNumberOfIds(3);
+    for (vtkIdType i = 0; i < 3; ++i) {
+        ptIds->SetId(i, i);
+    }
+    ug->InsertNextCell(VTK_TRIANGLE, ptIds);
+    ptIds->Delete();
+
+    // Compute the bounding box
+    double* bbox = ug->GetBounds();
+
+    // Find all the grid cells in the bounding box
+    vtkIdList* cellIds = vtkIdList::New();
+    (*self)->cellLocator->FindCellsWithinBounds(bbox, cellIds);
+    if (cellIds->GetNumberOfIds() == 0) {
+        // No intersection
+        return 0;
+    }
+
+    // Compute the intersection between each grid cell face with the triangle's edges
+    double t; // parametric position along the line
+    std::vector<double> pt(3); // intersection point
+    double pcoords[] = {0, 0, 0}; // tetrahedron parametric coordinates
+    int subId; // not used
+    double* pa; // start point on the line
+    double* pb; // end point of the line
+    vtkCell* tri = ug->GetCell(0);
+    int numEdges = tri->GetNumberOfEdges();
+    for (int i = 0; i < numEdges; ++i) {
+        vtkCell* edge = tri->GetEdge(i);
+        pa = points->GetPoint(edge->GetPointId(0));
+        pb = points->GetPoint(edge->GetPointId(1));
+        // Iterate over the grid cells in the box
+        for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
+            vtkCell* cell = (*self)->ugrid->GetCell(cellIds->GetId(j));
+            int numFaces = cell->GetNumberOfFaces();
+            for (int k = 0; k < numFaces; ++k) {
+                vtkCell* face = cell->GetFace(k);
+                int res = face->IntersectWithLine(pa, pb, (*self)->tol, t, &pt.front(), pcoords, subId);
+                if (res) {
+                    (*self)->intersectPoints.push_back(pt);
+                }
+            }
+        }
+    }
+
+    // Compute the intersection between each grid cell edge with the triangle
+    // Iterate over the grid cells in the box
+    for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
+        vtkCell* cell = (*self)->ugrid->GetCell(cellIds->GetId(j));
+        int numEdges = cell->GetNumberOfEdges();
+        for (int k = 0; k < numEdges; ++k) {
+            vtkCell* edge = cell->GetEdge(k);
+            pa = points->GetPoint(edge->GetPointId(0));
+            pb = points->GetPoint(edge->GetPointId(1));
+            int res = tri->IntersectWithLine(pa, pb, (*self)->tol, t, &pt.front(), pcoords, subId);
+            if (res) {
+                (*self)->intersectPoints.push_back(pt);
+            }                
+        }
+    }
+
+    // Add the triangle's vertices
+    (*self)->intersectPoints.push_back(std::vector<double>(p0, p0 + 4));
+    (*self)->intersectPoints.push_back(std::vector<double>(p1, p1 + 4));
+    (*self)->intersectPoints.push_back(std::vector<double>(p2, p2 + 4));
+
+    // Add all the grid cell vertices that are inside this triangle
+    double* closestPoint;
+    double dist2;
+    double weights[] = {0, 0};
+    // Iterate over the grid cells
+    for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
+        vtkCell* cell = (*self)->ugrid->GetCell(cellIds->GetId(j));
+        vtkIdType numPoints = cell->GetNumberOfPoints();
+        for (vtkIdType i = 0; i < numPoints; ++i) {
+            double* p = points->GetPoint(cell->GetPointId(i));
+            int res = tri->EvaluatePosition(p, closestPoint, subId, pcoords, dist2, weights);
+            bool inside = true;
+            double sum = 0;
+            for (size_t k = 0; k < 2; ++k) {
+                inside &= pcoords[k] > -(*self)->tol;
+                inside &= pcoords[k] < 1 + (*self)->tol;
+                sum += pcoords[k];
+            }
+            if (inside && sum < 1 + (*self)->tol) {
+                (*self)->intersectPoints.push_back(std::vector<double>(p, p + 4));
+            }
+        }
+    }
+
+    // Clean up
+    cellIds->Delete();
+    points->Delete();
+    ug->Delete();
+
     return 0;
 }
 
@@ -109,7 +271,7 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
     // Compute the intersection between each grid cell face with the tet's edges
     double t; // parametric position along the line
     std::vector<double> pt(3); // intersection point
-    double pcoords[] = {0, 0, 0}; // tetrahedron parametric coordinates
+    double pcoords[] = {0, 0}; // tetrahedron parametric coordinates
     int subId; // not used
     double* pa; // start point on the line
     double* pb; // end point of the line
@@ -163,14 +325,21 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
     double* closestPoint;
     double dist2;
     double weights[] = {0, 0, 0};
-    // Itereate over the grid cells
+    // Iterate over the grid cells
     for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
         vtkCell* cell = (*self)->ugrid->GetCell(cellIds->GetId(j));
         vtkIdType numPoints = cell->GetNumberOfPoints();
         for (vtkIdType i = 0; i < numPoints; ++i) {
             double* p = points->GetPoint(cell->GetPointId(i));
-            int res = cell->EvaluatePosition(p, closestPoint, subId, pcoords, dist2, weights);
-            if (res) {
+            int res = tet->EvaluatePosition(p, closestPoint, subId, pcoords, dist2, weights);
+            bool inside = true;
+            double sum = 0;
+            for (size_t k = 0; k < 3; ++k) {
+                inside &= pcoords[k] > -(*self)->tol;
+                inside &= pcoords[k] < 1 + (*self)->tol;
+                sum += pcoords[k];
+            }
+            if (inside && sum < 1 + (*self)->tol) {
                 (*self)->intersectPoints.push_back(std::vector<double>(p, p + 4));
             }
         }
