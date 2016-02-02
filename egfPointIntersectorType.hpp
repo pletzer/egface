@@ -56,6 +56,14 @@ int egfPointIntersector_setGrid(egfPointIntersectorType** self, egfGridType* gri
 int egfPointIntersector_setTolerance(egfPointIntersectorType** self, double tol);
 
 /**
+ * Set number of cells per bucket
+ * @param self handle
+ * @param numCells number of cells
+ * @return 0 upon success
+ */
+int egfPointIntersector_setNumberOfCellsPerBucket(egfPointIntersectorType** self, int numCells);
+
+/**
  * Find grid points intersecting with line segment
  * @param self handle
  * @param p0 first tetrahedron vertex

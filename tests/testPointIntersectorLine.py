@@ -31,36 +31,40 @@ ier = lib.egfGrid_new(byref(grid))
 ier = lib.egfGrid_loadFromFile(byref(grid), args.input)
 
 # Opaque handle
-locator = c_void_p(0)
+intrsctr = c_void_p(0)
 
 # Constructor
-ier = lib.egfPointIntersector_new(byref(locator))
-assert ier == 0
-
-# Set the grid
-ier = lib.egfPointIntersector_setGrid(byref(locator), grid)
+ier = lib.egfPointIntersector_new(byref(intrsctr))
 assert ier == 0
 
 # Set the tolerance
-lib.egfPointIntersector_setTolerance.argtypes = [c_void_p, c_double]
-ier = lib.egfPointIntersector_setTolerance(byref(locator), 1.e-12)
+tol = c_double(1.e-12)
+ier = lib.egfPointIntersector_setTolerance(byref(intrsctr), tol)
+assert ier == 0
+
+# Set the number of cells per bucket
+ier = lib.egfPointIntersector_setNumberOfCellsPerBucket(byref(intrsctr), 100)
+assert ier == 0
+
+# Set the grid
+ier = lib.egfPointIntersector_setGrid(byref(intrsctr), grid)
 assert ier == 0
 
 # Compute all the intersection points
 p0 = numpy.array(eval(args.p0), numpy.float64)
 p1 = numpy.array(eval(args.p1), numpy.float64)
 print 'p0 = ', p0, ' p1 = ', p1
-ier = lib.egfPointIntersector_gridWithLine(byref(locator),
+ier = lib.egfPointIntersector_gridWithLine(byref(intrsctr),
                                            p0.ctypes.data_as(POINTER(c_double)),
                                            p1.ctypes.data_as(POINTER(c_double)))
 assert ier == 0
 
 # Print the object
-ier = lib.egfPointIntersector_print(byref(locator))
+ier = lib.egfPointIntersector_print(byref(intrsctr))
 assert ier == 0
 
 # Destructor
-ier = lib.egfCellLocator_del(byref(locator))
+ier = lib.egfCellLocator_del(byref(intrsctr))
 assert ier == 0
 
 # Delete grid

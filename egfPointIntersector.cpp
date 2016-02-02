@@ -14,6 +14,7 @@ int egfPointIntersector_new(egfPointIntersectorType** self) {
 	(*self)->cellLocator = vtkCellLocator::New();
     (*self)->cellLocator->SetNumberOfCellsPerBucket(20);
 	(*self)->tol = 1.e-10;
+    (*self)->intersectPoints.reserve(100);
 	return 0;
 }
 
@@ -26,10 +27,12 @@ int egfPointIntersector_del(egfPointIntersectorType** self) {
 
 int egfPointIntersector_print(egfPointIntersectorType** self) {
 	std::cout << "egfPointIntersector:\n";
-	std::cout << "found points: ";
+	std::cout << "found " << (*self)->intersectPoints.size() << " points\n";
 	for (size_t i = 0; i < (*self)->intersectPoints.size(); ++i) {
-        for (size_t j = 0; j < 3; ++j) {
-		  std::cout << (*self)->intersectPoints[i][j] << ", ";
+        std::cout << "point " << i << ' ';
+        std::vector<double>& pt = (*self)->intersectPoints[i];
+        for (size_t j = 0; j < pt.size(); ++j) {
+		  std::cout << pt[j] << ", ";
         }
         std::cout << '\n';
 	}
@@ -62,6 +65,12 @@ int egfPointIntersector_setTolerance(egfPointIntersectorType** self, double tol)
     return 0;
 }
 
+int egfPointIntersector_setNumberOfCellsPerBucket(egfPointIntersectorType** self, int numCells) {
+    (*self)->cellLocator->SetNumberOfCellsPerBucket(numCells);
+    return 0;
+}
+
+
 int egfPointIntersector_gridWithLine(egfPointIntersectorType** self, 
                                      const double p0[], 
                                      const double p1[]) {
@@ -87,15 +96,12 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
 
     // Find the cells along the line
     vtkSmartPointer<vtkIdList> cellIds = vtkSmartPointer<vtkIdList>::New();
-    std::cerr << "2.1 pa = " << pa[0] << ' ' << pa[1] << ' ' << pa[2] << " pb = " << pb[0] << ' ' << pb[1] << ' ' << pb[2] << "\n";
     (*self)->cellLocator->FindCellsAlongLine(&pa[0], &pb[0], (*self)->tol, cellIds);
-    std::cerr << "2.2\n";
     if (cellIds->GetNumberOfIds() == 0) {
         // No intersection
         return 0;
     }
 
-    std::cerr << "3\n";
     // Compute the intersection between each grid cell face with the segment
     double t; // parametric position along the line
     std::vector<double> pt(3); // intersection point
@@ -114,12 +120,10 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
         }
     }
 
-    std::cerr << "4\n";
     // Add the segment's vertices
     (*self)->intersectPoints.push_back(std::vector<double>(p0, p0 + 3));
     (*self)->intersectPoints.push_back(std::vector<double>(p1, p1 + 3));
 
-    std::cerr << "5\n";
     return 0;
 }
 

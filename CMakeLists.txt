@@ -19,7 +19,12 @@ add_library(egface SHARED
             egfGrid.cpp
             egfCellLocator.cpp
             egfPointIntersector.cpp)
-target_link_libraries(egface ${VTK_LIBRARIES})
+
+if(VTK_LIBRARIES)
+  target_link_libraries(egface ${VTK_LIBRARIES})
+else()
+  target_link_libraries(egface vtkHybrid)
+endif()
 
 # enable ctest
 enable_testing()
