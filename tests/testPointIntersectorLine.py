@@ -47,8 +47,9 @@ ier = lib.egfPointIntersector_setTolerance(byref(locator), 1.e-12)
 assert ier == 0
 
 # Compute all the intersection points
-p0 = numpy.array(eval(args.p0))
-p1 = numpy.array(eval(args.p1))
+p0 = numpy.array(eval(args.p0), numpy.float64)
+p1 = numpy.array(eval(args.p1), numpy.float64)
+print 'p0 = ', p0, ' p1 = ', p1
 ier = lib.egfPointIntersector_gridWithLine(byref(locator),
                                            p0.ctypes.data_as(POINTER(c_double)),
                                            p1.ctypes.data_as(POINTER(c_double)))

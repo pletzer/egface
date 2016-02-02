@@ -2,9 +2,6 @@
 #include <vtkSmartPointer.h>
 #include <vtkIdList.h>
 #include <vtkCell.h>
-#include <vtkTetra.h>
-#include <vtkTriangle.h>
-#include <vtkLine.h>
 #include <vtkPoints.h>
 #include <iostream>
 #include <algorithm>
@@ -15,6 +12,7 @@ int egfPointIntersector_new(egfPointIntersectorType** self) {
 	(*self) = new egfPointIntersectorType();
     (*self)->ugrid = NULL;
 	(*self)->cellLocator = vtkCellLocator::New();
+    (*self)->cellLocator->SetNumberOfCellsPerBucket(20);
 	(*self)->tol = 1.e-10;
 	return 0;
 }
@@ -69,33 +67,35 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
                                      const double p1[]) {
 
     // VTK does nto enforce const'ness
-    std::vector<double> pa(p0, p0 + 4);
-    std::vector<double> pb(p1, p1 + 4);
+    std::vector<double> pa(p0, p0 + 3);
+    std::vector<double> pb(p1, p1 + 3);
 
     // Construct triangle by building a one cell unstructured grid
-    vtkUnstructuredGrid* ug = vtkUnstructuredGrid::New();
-    vtkPoints* points = vtkPoints::New();
+    vtkSmartPointer<vtkUnstructuredGrid> ug = vtkSmartPointer<vtkUnstructuredGrid>::New();
+    vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
     points->SetNumberOfPoints(2);
     points->SetPoint(0, p0);
     points->SetPoint(1, p1);
     ug->SetPoints(points);
     ug->Allocate(1, 1);
-    vtkIdList* ptIds = vtkIdList::New();
+    vtkSmartPointer<vtkIdList> ptIds = vtkSmartPointer<vtkIdList>::New();
     ptIds->SetNumberOfIds(2);
     for (vtkIdType i = 0; i < 2; ++i) {
         ptIds->SetId(i, i);
     }
     ug->InsertNextCell(VTK_LINE, ptIds);
-    ptIds->Delete();
 
     // Find the cells along the line
-    vtkIdList* cellIds = vtkIdList::New();
+    vtkSmartPointer<vtkIdList> cellIds = vtkSmartPointer<vtkIdList>::New();
+    std::cerr << "2.1 pa = " << pa[0] << ' ' << pa[1] << ' ' << pa[2] << " pb = " << pb[0] << ' ' << pb[1] << ' ' << pb[2] << "\n";
     (*self)->cellLocator->FindCellsAlongLine(&pa[0], &pb[0], (*self)->tol, cellIds);
+    std::cerr << "2.2\n";
     if (cellIds->GetNumberOfIds() == 0) {
         // No intersection
         return 0;
     }
 
+    std::cerr << "3\n";
     // Compute the intersection between each grid cell face with the segment
     double t; // parametric position along the line
     std::vector<double> pt(3); // intersection point
@@ -114,15 +114,12 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
         }
     }
 
+    std::cerr << "4\n";
     // Add the segment's vertices
-    (*self)->intersectPoints.push_back(std::vector<double>(p0, p0 + 4));
-    (*self)->intersectPoints.push_back(std::vector<double>(p1, p1 + 4));
+    (*self)->intersectPoints.push_back(std::vector<double>(p0, p0 + 3));
+    (*self)->intersectPoints.push_back(std::vector<double>(p1, p1 + 3));
 
-    // Clean up
-    cellIds->Delete();
-    points->Delete();
-    ug->Delete();
-
+    std::cerr << "5\n";
     return 0;
 }
 
@@ -132,27 +129,26 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
                                          const double p2[]) {
 
     // Construct triangle by building a one cell unstructured grid
-    vtkUnstructuredGrid* ug = vtkUnstructuredGrid::New();
-    vtkPoints* points = vtkPoints::New();
+    vtkSmartPointer<vtkUnstructuredGrid> ug = vtkSmartPointer<vtkUnstructuredGrid>::New();
+    vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
     points->SetNumberOfPoints(3);
     points->SetPoint(0, p0);
     points->SetPoint(1, p1);
     points->SetPoint(2, p2);
     ug->SetPoints(points);
     ug->Allocate(1, 1);
-    vtkIdList* ptIds = vtkIdList::New();
+    vtkSmartPointer<vtkIdList> ptIds = vtkSmartPointer<vtkIdList>::New();
     ptIds->SetNumberOfIds(3);
     for (vtkIdType i = 0; i < 3; ++i) {
         ptIds->SetId(i, i);
     }
     ug->InsertNextCell(VTK_TRIANGLE, ptIds);
-    ptIds->Delete();
 
     // Compute the bounding box
     double* bbox = ug->GetBounds();
 
     // Find all the grid cells in the bounding box
-    vtkIdList* cellIds = vtkIdList::New();
+    vtkSmartPointer<vtkIdList> cellIds = vtkSmartPointer<vtkIdList>::New();
     (*self)->cellLocator->FindCellsWithinBounds(bbox, cellIds);
     if (cellIds->GetNumberOfIds() == 0) {
         // No intersection
@@ -203,9 +199,9 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
     }
 
     // Add the triangle's vertices
-    (*self)->intersectPoints.push_back(std::vector<double>(p0, p0 + 4));
-    (*self)->intersectPoints.push_back(std::vector<double>(p1, p1 + 4));
-    (*self)->intersectPoints.push_back(std::vector<double>(p2, p2 + 4));
+    (*self)->intersectPoints.push_back(std::vector<double>(p0, p0 + 3));
+    (*self)->intersectPoints.push_back(std::vector<double>(p1, p1 + 3));
+    (*self)->intersectPoints.push_back(std::vector<double>(p2, p2 + 3));
 
     // Add all the grid cell vertices that are inside this triangle
     double* closestPoint;
@@ -226,15 +222,10 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
                 sum += pcoords[k];
             }
             if (inside && sum < 1 + (*self)->tol) {
-                (*self)->intersectPoints.push_back(std::vector<double>(p, p + 4));
+                (*self)->intersectPoints.push_back(std::vector<double>(p, p + 3));
             }
         }
     }
-
-    // Clean up
-    cellIds->Delete();
-    points->Delete();
-    ug->Delete();
 
     return 0;
 }
@@ -246,8 +237,8 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
                                             const double p3[]) {
 
     // Construct tetrahedron by building a one cell unstructured grid
-    vtkUnstructuredGrid* ug = vtkUnstructuredGrid::New();
-    vtkPoints* points = vtkPoints::New();
+    vtkSmartPointer<vtkUnstructuredGrid> ug = vtkSmartPointer<vtkUnstructuredGrid>::New();
+    vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
     points->SetNumberOfPoints(4);
     points->SetPoint(0, p0);
     points->SetPoint(1, p1);
@@ -255,19 +246,18 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
     points->SetPoint(3, p3);
     ug->SetPoints(points);
     ug->Allocate(1, 1);
-    vtkIdList* ptIds = vtkIdList::New();
+    vtkSmartPointer<vtkIdList> ptIds = vtkSmartPointer<vtkIdList>::New();
     ptIds->SetNumberOfIds(4);
     for (vtkIdType i = 0; i < 4; ++i) {
         ptIds->SetId(i, i);
     }
     ug->InsertNextCell(VTK_TETRA, ptIds);
-    ptIds->Delete();
 
     // Compute the bounding box
     double* bbox = ug->GetBounds();
 
     // Find all the grid cells in the bounding box
-    vtkIdList* cellIds = vtkIdList::New();
+    vtkSmartPointer<vtkIdList> cellIds = vtkSmartPointer<vtkIdList>::New();
     (*self)->cellLocator->FindCellsWithinBounds(bbox, cellIds);
     if (cellIds->GetNumberOfIds() == 0) {
         // No intersection
@@ -322,10 +312,10 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
     }
 
     // Add the tet's vertices
-    (*self)->intersectPoints.push_back(std::vector<double>(p0, p0 + 4));
-    (*self)->intersectPoints.push_back(std::vector<double>(p1, p1 + 4));
-    (*self)->intersectPoints.push_back(std::vector<double>(p2, p2 + 4));
-    (*self)->intersectPoints.push_back(std::vector<double>(p3, p3 + 4));
+    (*self)->intersectPoints.push_back(std::vector<double>(p0, p0 + 3));
+    (*self)->intersectPoints.push_back(std::vector<double>(p1, p1 + 3));
+    (*self)->intersectPoints.push_back(std::vector<double>(p2, p2 + 3));
+    (*self)->intersectPoints.push_back(std::vector<double>(p3, p3 + 3));
 
     // Add all the grid cell vertices that are inside this tet
     double* closestPoint;
@@ -346,15 +336,10 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
                 sum += pcoords[k];
             }
             if (inside && sum < 1 + (*self)->tol) {
-                (*self)->intersectPoints.push_back(std::vector<double>(p, p + 4));
+                (*self)->intersectPoints.push_back(std::vector<double>(p, p + 3));
             }
         }
     }
-
-    // Clean up
-    cellIds->Delete();
-    points->Delete();
-    ug->Delete();
 
     return 0;
 }
