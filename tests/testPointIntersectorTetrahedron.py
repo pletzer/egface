@@ -10,9 +10,13 @@ parser.add_argument('--build_dir', dest='build_dir', default='./',
 parser.add_argument('--input', dest='input', default='',
                     help='Specify input file')
 parser.add_argument('--p0', dest='p0', type=str, default='0,0,0',
-                    help='Specify segment starting point')
+                    help='Specify first tetrahedron point')
 parser.add_argument('--p1', dest='p1', type=str, default='1,0,0',
-                    help='Specify segment ending point')
+                    help='Specify second tetrahedron point')
+parser.add_argument('--p2', dest='p2', type=str, default='0,1,0',
+                    help='Specify third tetrahedron point')
+parser.add_argument('--p3', dest='p3', type=str, default='0,0,1',
+                    help='Specify fourth tetrahedron point')
 args = parser.parse_args()
 
 suffix = 'so'
@@ -53,10 +57,14 @@ assert ier == 0
 # Compute all the intersection points
 p0 = numpy.array(eval(args.p0), numpy.float64)
 p1 = numpy.array(eval(args.p1), numpy.float64)
-print 'p0 = ', p0, ' p1 = ', p1
-ier = lib.egfPointIntersector_gridWithLine(byref(intrsctr),
-                                           p0.ctypes.data_as(POINTER(c_double)),
-                                           p1.ctypes.data_as(POINTER(c_double)))
+p2 = numpy.array(eval(args.p2), numpy.float64)
+p3 = numpy.array(eval(args.p3), numpy.float64)
+print 'p0 = ', p0, ' p1 = ', p1, ' p2 = ', p2, ' p3 = ', p3
+ier = lib.egfPointIntersector_gridWithTetrahedron(byref(intrsctr),
+                                                  p0.ctypes.data_as(POINTER(c_double)),
+                                                  p1.ctypes.data_as(POINTER(c_double)),
+                                                  p2.ctypes.data_as(POINTER(c_double)),
+                                                  p3.ctypes.data_as(POINTER(c_double)))
 assert ier == 0
 
 # Print the object
