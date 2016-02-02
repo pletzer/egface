@@ -8,11 +8,12 @@
 #include "egfGridType.hpp"
 #include <vtkCellLocator.h>
 #include <vector>
+#include <set>
 
 struct egfPointIntersectorType {
 	vtkUnstructuredGrid* ugrid;
     vtkCellLocator* cellLocator;
-    std::vector< std::vector<double> > intersectPoints;
+    std::set< std::vector<double> > intersectPoints;
     double tol;
 };
 

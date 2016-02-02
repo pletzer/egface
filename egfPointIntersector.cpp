@@ -14,7 +14,6 @@ int egfPointIntersector_new(egfPointIntersectorType** self) {
 	(*self)->cellLocator = vtkCellLocator::New();
     (*self)->cellLocator->SetNumberOfCellsPerBucket(20);
 	(*self)->tol = 1.e-10;
-    (*self)->intersectPoints.reserve(100);
 	return 0;
 }
 
@@ -28,11 +27,11 @@ int egfPointIntersector_del(egfPointIntersectorType** self) {
 int egfPointIntersector_print(egfPointIntersectorType** self) {
 	std::cout << "egfPointIntersector:\n";
 	std::cout << "found " << (*self)->intersectPoints.size() << " points\n";
-	for (size_t i = 0; i < (*self)->intersectPoints.size(); ++i) {
-        std::cout << "point " << i << ' ';
-        std::vector<double>& pt = (*self)->intersectPoints[i];
-        for (size_t j = 0; j < pt.size(); ++j) {
-		  std::cout << pt[j] << ", ";
+	for (std::set< std::vector<double> >::const_iterator p = (*self)->intersectPoints.begin(); 
+         p != (*self)->intersectPoints.end(); ++p) {
+        std::cout << "point ";
+        for (size_t j = 0; j < (*p).size(); ++j) {
+		  std::cout << (*p)[j] << ", ";
         }
         std::cout << '\n';
 	}
@@ -52,10 +51,13 @@ int egfPointIntersector_getNumberOfPoints(egfPointIntersectorType** self, int* n
 }
 
 int egfPointIntersector_fillInPoints(egfPointIntersectorType** self, double* points) {
-    for (size_t i = 0; i < (*self)->intersectPoints.size(); ++i) {
-        for (size_t j = 0; j < 3; ++j) {
-            points[i*3 + j] = (*self)->intersectPoints[i][j];
+    size_t i = 0;
+    for (std::set< std::vector<double> >::const_iterator p = (*self)->intersectPoints.begin(); 
+         p != (*self)->intersectPoints.end(); ++p) {
+        for (size_t j = 0; j < (*p).size(); ++j) {
+            points[i*3 + j] = (*p)[j];
         }
+        i++;
     }
     return 0;
 }
@@ -115,14 +117,14 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
             vtkCell* face = cell->GetFace(k);
             int res = face->IntersectWithLine(&pa[0], &pb[0], (*self)->tol, t, &pt.front(), pcoords, subId);
             if (res) {
-                (*self)->intersectPoints.push_back(pt);
+                (*self)->intersectPoints.insert(pt);
             }
         }
     }
 
     // Add the segment's vertices
-    (*self)->intersectPoints.push_back(std::vector<double>(p0, p0 + 3));
-    (*self)->intersectPoints.push_back(std::vector<double>(p1, p1 + 3));
+    (*self)->intersectPoints.insert(std::vector<double>(p0, p0 + 3));
+    (*self)->intersectPoints.insert(std::vector<double>(p1, p1 + 3));
 
     return 0;
 }
@@ -180,7 +182,7 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
                 vtkCell* face = cell->GetFace(k);
                 int res = face->IntersectWithLine(pa, pb, (*self)->tol, t, &pt.front(), pcoords, subId);
                 if (res) {
-                    (*self)->intersectPoints.push_back(pt);
+                    (*self)->intersectPoints.insert(pt);
                 }
             }
         }
@@ -197,15 +199,15 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
             pb = points->GetPoint(edge->GetPointId(1));
             int res = tri->IntersectWithLine(pa, pb, (*self)->tol, t, &pt.front(), pcoords, subId);
             if (res) {
-                (*self)->intersectPoints.push_back(pt);
+                (*self)->intersectPoints.insert(pt);
             }                
         }
     }
 
     // Add the triangle's vertices
-    (*self)->intersectPoints.push_back(std::vector<double>(p0, p0 + 3));
-    (*self)->intersectPoints.push_back(std::vector<double>(p1, p1 + 3));
-    (*self)->intersectPoints.push_back(std::vector<double>(p2, p2 + 3));
+    (*self)->intersectPoints.insert(std::vector<double>(p0, p0 + 3));
+    (*self)->intersectPoints.insert(std::vector<double>(p1, p1 + 3));
+    (*self)->intersectPoints.insert(std::vector<double>(p2, p2 + 3));
 
     // Add all the grid cell vertices that are inside this triangle
     double* closestPoint;
@@ -226,7 +228,7 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
                 sum += pcoords[k];
             }
             if (inside && sum < 1 + (*self)->tol) {
-                (*self)->intersectPoints.push_back(std::vector<double>(p, p + 3));
+                (*self)->intersectPoints.insert(std::vector<double>(p, p + 3));
             }
         }
     }
@@ -289,7 +291,7 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
                 vtkCell* face = cell->GetFace(k);
                 int res = face->IntersectWithLine(pa, pb, (*self)->tol, t, &pt.front(), pcoords, subId);
                 if (res) {
-                    (*self)->intersectPoints.push_back(pt);
+                    (*self)->intersectPoints.insert(pt);
                 }
             }
         }
@@ -309,17 +311,17 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
                 pb = points->GetPoint(edge->GetPointId(1));
                 int res = face->IntersectWithLine(pa, pb, (*self)->tol, t, &pt.front(), pcoords, subId);
                 if (res) {
-                    (*self)->intersectPoints.push_back(pt);
+                    (*self)->intersectPoints.insert(pt);
                 }                
             }
         }
     }
 
     // Add the tet's vertices
-    (*self)->intersectPoints.push_back(std::vector<double>(p0, p0 + 3));
-    (*self)->intersectPoints.push_back(std::vector<double>(p1, p1 + 3));
-    (*self)->intersectPoints.push_back(std::vector<double>(p2, p2 + 3));
-    (*self)->intersectPoints.push_back(std::vector<double>(p3, p3 + 3));
+    (*self)->intersectPoints.insert(std::vector<double>(p0, p0 + 3));
+    (*self)->intersectPoints.insert(std::vector<double>(p1, p1 + 3));
+    (*self)->intersectPoints.insert(std::vector<double>(p2, p2 + 3));
+    (*self)->intersectPoints.insert(std::vector<double>(p3, p3 + 3));
 
     // Add all the grid cell vertices that are inside this tet
     double* closestPoint;
@@ -340,7 +342,7 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
                 sum += pcoords[k];
             }
             if (inside && sum < 1 + (*self)->tol) {
-                (*self)->intersectPoints.push_back(std::vector<double>(p, p + 3));
+                (*self)->intersectPoints.insert(std::vector<double>(p, p + 3));
             }
         }
     }
