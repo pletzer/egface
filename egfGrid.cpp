@@ -47,11 +47,8 @@ int egfGrid_loadFromFile(egfGridType** self, const char* filename) {
     vtkSmartPointer<vtkUnstructuredGridReader> reader = vtkSmartPointer<vtkUnstructuredGridReader>::New();
     reader->SetFileName(filename);
     reader->Update();
-#if (VTK_MAJOR_VERSION < 6)
     (*self)->ugrid->DeepCopy(reader->GetOutput());
-#else
-    (*self)->ugrid->DeepCopy(reader->GetOutputData());
-#endif
+    (*self)->ugrid->DeepCopy(reader->GetOutput());
 	return 0;
 }
 
