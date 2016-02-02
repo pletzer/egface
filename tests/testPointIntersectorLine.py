@@ -46,7 +46,7 @@ assert ier == 0
 ier = lib.egfPointIntersector_setNumberOfCellsPerBucket(byref(intrsctr), 100)
 assert ier == 0
 
-# Set the grid
+# Set the grid, should be called after setNumberOfCellsPerBucket
 ier = lib.egfPointIntersector_setGrid(byref(intrsctr), grid)
 assert ier == 0
 
@@ -62,6 +62,18 @@ assert ier == 0
 # Print the object
 ier = lib.egfPointIntersector_print(byref(intrsctr))
 assert ier == 0
+
+# Check
+numPoints = c_int()
+ier = lib.egfPointIntersector_getNumberOfPoints(byref(intrsctr), byref(numPoints))
+assert ier == 0
+print 'number of intersection points: ', numPoints.value
+
+# Fill in the intersection points
+points = numpy.zeros((3*numPoints.value,), numpy.float64)
+ier = lib.egfPointIntersector_fillInPoints(byref(intrsctr), points.ctypes.data_as(POINTER(c_double)))
+assert ier == 0
+print 'intersection points: \n', points.reshape((numPoints.value, 3))
 
 # Destructor
 ier = lib.egfCellLocator_del(byref(intrsctr))
