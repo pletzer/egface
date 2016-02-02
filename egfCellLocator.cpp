@@ -10,7 +10,6 @@ extern "C" {
 int egfCellLocator_new(egfCellLocatorType** self) {
 	(*self) = new egfCellLocatorType();
 	(*self)->cellLocator = vtkCellLocator::New();
-	(*self)->tol = 1.e-10;
 	(*self)->treeHasBeenBuilt = false;
 	return 0;
 }
@@ -32,11 +31,7 @@ int egfCellLocator_print(egfCellLocatorType** self) {
 }
 
 int egfCellLocator_setGrid(egfCellLocatorType** self, egfGridType* grid) {
-#if VTK_MAJOR_VERSION <= 5
     (*self)->cellLocator->SetDataSet(grid->ugrid);
-#else
-    (*self)->cellLocator->SetInputData(grid->ugrid);
-#endif
     return 0;
 }
 

@@ -1,5 +1,5 @@
 /**
- * Grid object
+ * Cell locator object
  */
 
 #ifndef EGF_CELL_LOCATOR
@@ -11,7 +11,6 @@
 struct egfCellLocatorType {
     vtkCellLocator* cellLocator;
     std::vector<int> cellIds;
-    double tol;
     bool treeHasBeenBuilt;
 };
 
@@ -64,7 +63,7 @@ int egfCellLocator_setGrid(egfCellLocatorType** self, egfGridType* grid);
  int egfCellLocator_findCellsInBox(egfCellLocatorType** self, const double posMin[], const double posMax[]); 
 
 /**
- * Get number of found cells
+ * Get number of cells found
  * @param self handle
  * @param numCells (output)
  * @return 0 upon success

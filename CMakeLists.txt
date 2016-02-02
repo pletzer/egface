@@ -17,7 +17,8 @@ endif()
 include(${VTK_USE_FILE})
 add_library(egface SHARED
             egfGrid.cpp
-            egfCellLocator.cpp)
+            egfCellLocator.cpp
+            egfPointIntersector.cpp)
 target_link_libraries(egface ${VTK_LIBRARIES})
 
 # enable ctest
