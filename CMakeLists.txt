@@ -84,3 +84,21 @@ add_test(NAME testPointIntersectorTriangleOutside
          --input "${CMAKE_SOURCE_DIR}/data/ugridex.vtk"
          --p0 "-1, -1, 0" --p1 "-2, -1, 0" --p2 "-2, -3, 0"
          )
+
+add_test(NAME testPointIntersectorTriangleInside
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorTriangle.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/ugridex.vtk"
+         --p0 "1, 0.2, 0.1" --p1 "1, 0.2, 5" --p2 "1, 0.7, 3"
+         )
+
+add_test(NAME testPointIntersectorTriangleMarginal
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorTriangle.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/ugridex.vtk"
+         --p0 "1, 0, 0" --p1 "1, 0, 6" --p2 "1, 1, 3"
+         )
+
+
