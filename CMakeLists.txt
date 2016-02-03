@@ -101,4 +101,27 @@ add_test(NAME testPointIntersectorTriangleMarginal
          --p0 "1, 0, 0" --p1 "1, 0, 6" --p2 "1, 1, 3"
          )
 
+add_test(NAME testPointIntersectorTetrahedronOutside
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorTetrahedron.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/ugridex.vtk"
+         --p0 "-1, -1, 0" --p1 "-2, -1, 0" --p2 "-2, -3, 0" --p3 "-4, -3, -1"
+         )
+
+add_test(NAME testPointIntersectorTetrahedronInside
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorTetrahedron.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/ugridex.vtk"
+         --p0 "1, 0.2, 0.1" --p1 "1, 0.2, 5" --p2 "1, 0.7, 3" --p3 "1.5, 0.7, 3"
+         )
+
+add_test(NAME testPointIntersectorTetrahedronMarginal
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorTetrahedron.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/ugridex.vtk"
+         --p0 "0, 0, 0" --p1 "0, 0, 6" --p2 "0, 1, 3" --p3 "2, 1, 3"
+         )
 
