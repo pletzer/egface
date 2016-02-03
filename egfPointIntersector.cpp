@@ -150,7 +150,7 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
     }
     ug->InsertNextCell(VTK_TRIANGLE, ptIds);
 
-    // Compute the bounding box
+    // Compute the bounding box of the triangle
     double* bbox = ug->GetBounds();
 
     // Find all the grid cells in the bounding box
@@ -212,7 +212,7 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
     // Add all the grid cell vertices that are inside this triangle
     double* closestPoint;
     double dist2;
-    double weights[] = {0, 0};
+    double weights[] = {0, 0, 0}; // must be defined as 3d
     // Iterate over the grid cells
     for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
         vtkCell* cell = (*self)->ugrid->GetCell(cellIds->GetId(j));
@@ -259,7 +259,7 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
     }
     ug->InsertNextCell(VTK_TETRA, ptIds);
 
-    // Compute the bounding box
+    // Compute the bounding box of the tetrahedron
     double* bbox = ug->GetBounds();
 
     // Find all the grid cells in the bounding box
