@@ -161,7 +161,6 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
     }
 
     // Add the segment's vertices
-    vtkCell* cell;
     vtkIdType cellId;
     double weights[] = {0, 0, 0};
     const double* endPoints[] = {p0, p1};
@@ -171,7 +170,8 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
         const double* point = endPoints[k];
 
         // Find the cell Id in the unstructured grid
-        (*self)->ugrid->FindCell((double*) point, cell, cellId, (*self)->tol*(*self)->tol, subId, pcoords, weights);
+        cellId = (*self)->ugrid->FindCell((double*) point, NULL, 0, 
+            (*self)->tol*(*self)->tol, subId, pcoords, weights);
 
         if (cellId >= 0) {
 
@@ -289,7 +289,6 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
     }
 
     // Add the triangle's vertices
-    vtkCell* cell;
     vtkIdType cellId;
     double weights[] = {0, 0, 0};
     const double* endPoints[] = {p0, p1, p2};
@@ -299,7 +298,8 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
         const double* point = endPoints[k];
 
         // Find the cell Id in the unstructured grid
-        (*self)->ugrid->FindCell((double*) point, cell, cellId, (*self)->tol*(*self)->tol, subId, pcoords, weights);
+        cellId = (*self)->ugrid->FindCell((double*) point, NULL, 0, 
+            (*self)->tol*(*self)->tol, subId, pcoords, weights);
 
         if (cellId >= 0) {
 
@@ -455,7 +455,6 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
     }
 
     // Add the tet's vertices
-    vtkCell* cell;
     vtkIdType cellId;
     double weights[] = {0, 0, 0};
     const double* endPoints[] = {p0, p1, p2, p3};
@@ -465,7 +464,8 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
         const double* point = endPoints[k];
 
         // Find the cell Id in the unstructured grid
-        (*self)->ugrid->FindCell((double*) point, cell, cellId, (*self)->tol*(*self)->tol, subId, pcoords, weights);
+        cellId = (*self)->ugrid->FindCell((double*) point, NULL, 0, 
+            (*self)->tol*(*self)->tol, subId, pcoords, weights);
 
         if (cellId >= 0) {
 
