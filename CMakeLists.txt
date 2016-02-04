@@ -26,6 +26,8 @@ else()
   target_link_libraries(egface vtkHybrid)
 endif()
 
+add_subdirectory(tests)
+
 # enable ctest
 enable_testing()
 
@@ -44,6 +46,10 @@ add_test(NAME testCellLocator
          "${CMAKE_SOURCE_DIR}/tests/testCellLocator.py"
          --build_dir ${CMAKE_BINARY_DIR}
          --input "${CMAKE_SOURCE_DIR}/data/rbc_001.vtk")
+
+add_test(NAME testPointIntersectorLineMarginalCxx
+         COMMAND "${CMAKE_BINARY_DIR}/tests/testPointIntersectorLineMarginal"
+         "${CMAKE_SOURCE_DIR}/data/ugridex.vtk")
 
 add_test(NAME testPointIntersectorLineNoIntersection
          COMMAND "${PYTHON_EXECUTABLE}" 
