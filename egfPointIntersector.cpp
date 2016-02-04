@@ -26,14 +26,17 @@ int egfPointIntersector_del(egfPointIntersectorType** self) {
 
 int egfPointIntersector_print(egfPointIntersectorType** self) {
 	std::cout << "egfPointIntersector:\n";
-	std::cout << "found " << (*self)->intersectPoints.size() << " points\n";
-	for (std::set< std::vector<double> >::const_iterator p = (*self)->intersectPoints.begin(); 
+	std::cout << "found " << (*self)->intersectPoints.size() << " cells\n";
+	for (std::map<vtkIdType, std::set<std::vector<double> > >::const_iterator p = (*self)->intersectPoints.begin(); 
          p != (*self)->intersectPoints.end(); ++p) {
-        std::cout << "point ";
-        for (size_t j = 0; j < (*p).size(); ++j) {
-		  std::cout << (*p)[j] << ", ";
+        std::cout << "\tcell" << p->first << ' ';
+        for (std::set<std::vector<double> >::const_iterator it = p->second.begin(); it != p->second.end(); ++it) {
+            std::cout << "\t\tpoint ";
+            for (size_t j = 0; j < (*it).size(); ++j) {
+                std::cout << (*it)[j] << ", ";
+            }
+            std::cout << '\n';
         }
-        std::cout << '\n';
 	}
     return 0;
 }
@@ -45,20 +48,44 @@ int egfPointIntersector_setGrid(egfPointIntersectorType** self, egfGridType* gri
     return 0;
 }
 
-int egfPointIntersector_getNumberOfPoints(egfPointIntersectorType** self, int* numPoints) {
-    *numPoints = (int) (*self)->intersectPoints.size();
+int egfPointIntersector_getNumberOfCells(egfPointIntersectorType** self, int* numCells) {
+    *numCells = (int) (*self)->intersectPoints.size();
     return 0;
 }
 
-int egfPointIntersector_fillInPoints(egfPointIntersectorType** self, double* points) {
+int egfPointIntersector_fillInCellIds(egfPointIntersectorType** self, int* cellIds) {
     size_t i = 0;
-    for (std::set< std::vector<double> >::const_iterator p = (*self)->intersectPoints.begin(); 
-         p != (*self)->intersectPoints.end(); ++p) {
-        for (size_t j = 0; j < (*p).size(); ++j) {
-            points[i*3 + j] = (*p)[j];
-        }
+    for (std::map<vtkIdType, std::set<std::vector<double> > >::const_iterator 
+      it = (*self)->intersectPoints.begin(); it != (*self)->intersectPoints.end(); ++it) {
+        cellIds[i] = (int) it->first;
         i++;
     }
+    return 0;
+}
+
+int egfPointIntersector_getNumberOfPointsInCell(egfPointIntersectorType** self, int cellId, int* numPoints) {
+    *numPoints = 0;
+    std::map<vtkIdType, std::set<std::vector<double> > >::const_iterator
+      it = (*self)->intersectPoints.find((vtkIdType) cellId);
+    if (it != (*self)->intersectPoints.end()) {
+        *numPoints = (int) it->second.size();
+    }
+    return 0;
+}
+
+int egfPointIntersector_fillInPointsInCell(egfPointIntersectorType** self, int cellId, double* points) {
+    std::map<vtkIdType, std::set<std::vector<double> > >::const_iterator
+      it = (*self)->intersectPoints.find((vtkIdType) cellId);
+    if (it != (*self)->intersectPoints.end()) {
+        size_t i = 0;
+        for (std::set<std::vector<double> >::const_iterator it2 = it->second.begin(); 
+          it2 != it->second.end(); ++it2) {
+            for (size_t j = 0; j < 3; ++j) {
+                points[i*3 + j] = (*it2)[j];
+            }
+            i++;
+        }
+    }    
     return 0;
 }
 
@@ -111,20 +138,58 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
     int subId; // not used
     // Iterate over the grid cells along the segment
     for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
+        std::set<std::vector<double> > s;
         vtkCell* cell = (*self)->ugrid->GetCell(cellIds->GetId(j));
         int numFaces = cell->GetNumberOfFaces();
         for (int k = 0; k < numFaces; ++k) {
             vtkCell* face = cell->GetFace(k);
             int res = face->IntersectWithLine(&pa[0], &pb[0], (*self)->tol, t, &pt.front(), pcoords, subId);
             if (res) {
-                (*self)->intersectPoints.insert(pt);
+                s.insert(pt);
             }
+        }
+
+        std::map<vtkIdType, std::set<std::vector<double> > >::iterator
+          it = (*self)->intersectPoints.find(j);
+        if (it == (*self)->intersectPoints.end()) {
+            (*self)->intersectPoints.insert(std::pair<vtkIdType, std::set<std::vector<double> > >(j, s));
+        }
+        else {
+            it->second.insert(s.begin(), s.end());
         }
     }
 
     // Add the segment's vertices
-    (*self)->intersectPoints.insert(std::vector<double>(p0, p0 + 3));
-    (*self)->intersectPoints.insert(std::vector<double>(p1, p1 + 3));
+    vtkCell* cell;
+    vtkIdType cellId;
+    double weights[] = {0, 0, 0};
+    const double* endPoints[] = {p0, p1};
+
+    // Iterate over the end points
+    for (size_t k = 0; k < 2; ++k) {
+        const double* point = endPoints[k];
+
+        // Find the cell Id in the unstructured grid
+        (*self)->ugrid->FindCell((double*) point, cell, cellId, (*self)->tol*(*self)->tol, subId, pcoords, weights);
+
+        if (cellId >= 0) {
+
+            // Is cellId a key?
+            std::map<vtkIdType, std::set<std::vector<double> > >::iterator
+              it = (*self)->intersectPoints.find(cellId);
+
+            if (it == (*self)->intersectPoints.end()) {
+                // No, create a set and insert it
+                std::set<std::vector<double> > s;
+                s.insert(std::vector<double>(point, point + 3));
+                (*self)->intersectPoints.insert(std::pair<vtkIdType, std::set<std::vector<double> > >(cellId, s));
+            }
+            else {
+                // Yes, insert the point
+                it->second.insert(std::vector<double>(point, point + 3));
+            }
+        }
+    }
 
     return 0;
 }
@@ -176,14 +241,23 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
         pb = points->GetPoint(edge->GetPointId(1));
         // Iterate over the grid cells in the box
         for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
+            std::set<std::vector<double> > s;
             vtkCell* cell = (*self)->ugrid->GetCell(cellIds->GetId(j));
             int numFaces = cell->GetNumberOfFaces();
             for (int k = 0; k < numFaces; ++k) {
                 vtkCell* face = cell->GetFace(k);
                 int res = face->IntersectWithLine(pa, pb, (*self)->tol, t, &pt.front(), pcoords, subId);
                 if (res) {
-                    (*self)->intersectPoints.insert(pt);
+                    s.insert(pt);
                 }
+            }
+            std::map<vtkIdType, std::set<std::vector<double> > >::iterator
+              it = (*self)->intersectPoints.find(j);
+            if (it == (*self)->intersectPoints.end()) {
+                (*self)->intersectPoints.insert(std::pair<vtkIdType, std::set<std::vector<double> > >(j, s));
+            }
+            else {
+                it->second.insert(s.begin(), s.end());
             }
         }
     }
@@ -191,6 +265,7 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
     // Compute the intersection between each grid cell edge with the triangle
     // Iterate over the grid cells in the box
     for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
+        std::set<std::vector<double> > s;
         vtkCell* cell = (*self)->ugrid->GetCell(cellIds->GetId(j));
         int numEdges = cell->GetNumberOfEdges();
         for (int k = 0; k < numEdges; ++k) {
@@ -199,27 +274,62 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
             pb = points->GetPoint(edge->GetPointId(1));
             int res = tri->IntersectWithLine(pa, pb, (*self)->tol, t, &pt.front(), pcoords, subId);
             if (res) {
-                (*self)->intersectPoints.insert(pt);
+                s.insert(pt);
             }                
+        }
+        std::map<vtkIdType, std::set<std::vector<double> > >::iterator
+          it = (*self)->intersectPoints.find(j);
+        if (it == (*self)->intersectPoints.end()) {
+            (*self)->intersectPoints.insert(std::pair<vtkIdType, std::set<std::vector<double> > >(j, s));
+        }
+        else {
+            it->second.insert(s.begin(), s.end());
         }
     }
 
     // Add the triangle's vertices
-    (*self)->intersectPoints.insert(std::vector<double>(p0, p0 + 3));
-    (*self)->intersectPoints.insert(std::vector<double>(p1, p1 + 3));
-    (*self)->intersectPoints.insert(std::vector<double>(p2, p2 + 3));
+    vtkCell* cell;
+    vtkIdType cellId;
+    double weights[] = {0, 0, 0};
+    const double* endPoints[] = {p0, p1, p2};
+
+    // Iterate over the end points
+    for (size_t k = 0; k < 2; ++k) {
+        const double* point = endPoints[k];
+
+        // Find the cell Id in the unstructured grid
+        (*self)->ugrid->FindCell((double*) point, cell, cellId, (*self)->tol*(*self)->tol, subId, pcoords, weights);
+
+        if (cellId >= 0) {
+
+            // Is cellId a key?
+            std::map<vtkIdType, std::set<std::vector<double> > >::iterator
+              it = (*self)->intersectPoints.find(cellId);
+
+            if (it == (*self)->intersectPoints.end()) {
+                // No, create a set and insert it
+                std::set<std::vector<double> > s;
+                s.insert(std::vector<double>(point, point + 3));
+                (*self)->intersectPoints.insert(std::pair<vtkIdType, std::set<std::vector<double> > >(cellId, s));
+            }
+            else {
+                // Yes, insert the point
+                it->second.insert(std::vector<double>(point, point + 3));
+            }
+        }
+    }
 
     // Add all the grid cell vertices that are inside this triangle
     double* closestPoint;
     double dist2;
-    double weights[] = {0, 0, 0}; // must be defined as 3d
     // Iterate over the grid cells
     for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
+        std::set<std::vector<double> > s;
         vtkCell* cell = (*self)->ugrid->GetCell(cellIds->GetId(j));
         vtkIdType numPoints = cell->GetNumberOfPoints();
         for (vtkIdType i = 0; i < numPoints; ++i) {
-            double* p = points->GetPoint(cell->GetPointId(i));
-            int res = tri->EvaluatePosition(p, closestPoint, subId, pcoords, dist2, weights);
+            double* point = points->GetPoint(cell->GetPointId(i));
+            int res = tri->EvaluatePosition(point, closestPoint, subId, pcoords, dist2, weights);
             bool inside = true;
             double sum = 0;
             for (size_t k = 0; k < 2; ++k) {
@@ -228,8 +338,16 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
                 sum += pcoords[k];
             }
             if (inside && sum < 1 + (*self)->tol) {
-                (*self)->intersectPoints.insert(std::vector<double>(p, p + 3));
+                s.insert(std::vector<double>(point, point + 3));
             }
+        }
+        std::map<vtkIdType, std::set<std::vector<double> > >::iterator
+          it = (*self)->intersectPoints.find(j);
+        if (it == (*self)->intersectPoints.end()) {
+            (*self)->intersectPoints.insert(std::pair<vtkIdType, std::set<std::vector<double> > >(j, s));
+        }
+        else {
+            it->second.insert(s.begin(), s.end());
         }
     }
 
@@ -273,7 +391,7 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
     // Compute the intersection between each grid cell face with the tet's edges
     double t; // parametric position along the line
     std::vector<double> pt(3); // intersection point
-    double pcoords[] = {0, 0}; // tetrahedron parametric coordinates
+    double pcoords[] = {0, 0, 0}; // tetrahedron parametric coordinates
     int subId; // not used
     double* pa; // start point on the line
     double* pb; // end point of the line
@@ -285,14 +403,23 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
         pb = points->GetPoint(edge->GetPointId(1));
         // Iterate over the grid cells in the box
         for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
+            std::set<std::vector<double> > s;
             vtkCell* cell = (*self)->ugrid->GetCell(cellIds->GetId(j));
             int numFaces = cell->GetNumberOfFaces();
             for (int k = 0; k < numFaces; ++k) {
                 vtkCell* face = cell->GetFace(k);
                 int res = face->IntersectWithLine(pa, pb, (*self)->tol, t, &pt.front(), pcoords, subId);
                 if (res) {
-                    (*self)->intersectPoints.insert(pt);
+                    s.insert(pt);
                 }
+            }
+            std::map<vtkIdType, std::set<std::vector<double> > >::iterator
+              it = (*self)->intersectPoints.find(j);
+            if (it == (*self)->intersectPoints.end()) {
+                (*self)->intersectPoints.insert(std::pair<vtkIdType, std::set<std::vector<double> > >(j, s));
+            }
+            else {
+                it->second.insert(s.begin(), s.end());
             }
         }
     }
@@ -303,6 +430,7 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
         vtkCell* face = tet->GetFace(i);
         // Iterate over the grid cells in the box
         for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
+            std::set<std::vector<double> > s;
             vtkCell* cell = (*self)->ugrid->GetCell(cellIds->GetId(j));
             int numEdges = cell->GetNumberOfEdges();
             for (int k = 0; k < numEdges; ++k) {
@@ -311,29 +439,63 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
                 pb = points->GetPoint(edge->GetPointId(1));
                 int res = face->IntersectWithLine(pa, pb, (*self)->tol, t, &pt.front(), pcoords, subId);
                 if (res) {
-                    (*self)->intersectPoints.insert(pt);
+                    s.insert(pt);
                 }                
+            }
+            std::map<vtkIdType, std::set<std::vector<double> > >::iterator
+              it = (*self)->intersectPoints.find(j);
+            if (it == (*self)->intersectPoints.end()) {
+                (*self)->intersectPoints.insert(std::pair<vtkIdType, std::set<std::vector<double> > >(j, s));
+            }
+            else {
+                it->second.insert(s.begin(), s.end());
             }
         }
     }
 
     // Add the tet's vertices
-    (*self)->intersectPoints.insert(std::vector<double>(p0, p0 + 3));
-    (*self)->intersectPoints.insert(std::vector<double>(p1, p1 + 3));
-    (*self)->intersectPoints.insert(std::vector<double>(p2, p2 + 3));
-    (*self)->intersectPoints.insert(std::vector<double>(p3, p3 + 3));
+    vtkCell* cell;
+    vtkIdType cellId;
+    double weights[] = {0, 0, 0};
+    const double* endPoints[] = {p0, p1, p2, p3};
+
+    // Iterate over the end points
+    for (size_t k = 0; k < 2; ++k) {
+        const double* point = endPoints[k];
+
+        // Find the cell Id in the unstructured grid
+        (*self)->ugrid->FindCell((double*) point, cell, cellId, (*self)->tol*(*self)->tol, subId, pcoords, weights);
+
+        if (cellId >= 0) {
+
+            // Is cellId a key?
+            std::map<vtkIdType, std::set<std::vector<double> > >::iterator
+              it = (*self)->intersectPoints.find(cellId);
+
+            if (it == (*self)->intersectPoints.end()) {
+                // No, create a set and insert it
+                std::set<std::vector<double> > s;
+                s.insert(std::vector<double>(point, point + 3));
+                (*self)->intersectPoints.insert(std::pair<vtkIdType, std::set<std::vector<double> > >(cellId, s));
+            }
+            else {
+                // Yes, insert the point
+                it->second.insert(std::vector<double>(point, point + 3));
+            }
+        }
+    }
 
     // Add all the grid cell vertices that are inside this tet
     double* closestPoint;
     double dist2;
-    double weights[] = {0, 0, 0};
     // Iterate over the grid cells
     for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
+        std::set<std::vector<double> > s;
         vtkCell* cell = (*self)->ugrid->GetCell(cellIds->GetId(j));
         vtkIdType numPoints = cell->GetNumberOfPoints();
         for (vtkIdType i = 0; i < numPoints; ++i) {
-            double* p = points->GetPoint(cell->GetPointId(i));
-            int res = tet->EvaluatePosition(p, closestPoint, subId, pcoords, dist2, weights);
+            double* point = points->GetPoint(cell->GetPointId(i));
+            int res = tet->EvaluatePosition(point, closestPoint, subId, pcoords, dist2, weights);
             bool inside = true;
             double sum = 0;
             for (size_t k = 0; k < 3; ++k) {
@@ -342,7 +504,7 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
                 sum += pcoords[k];
             }
             if (inside && sum < 1 + (*self)->tol) {
-                (*self)->intersectPoints.insert(std::vector<double>(p, p + 3));
+                s.insert(std::vector<double>(point, point + 3));
             }
         }
     }

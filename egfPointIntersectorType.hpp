@@ -8,12 +8,13 @@
 #include "egfGridType.hpp"
 #include <vtkCellLocator.h>
 #include <vector>
+#include <map>
 #include <set>
 
 struct egfPointIntersectorType {
 	vtkUnstructuredGrid* ugrid;
     vtkCellLocator* cellLocator;
-    std::set< std::vector<double> > intersectPoints;
+    std::map<vtkIdType, std::set<std::vector<double> > > intersectPoints;
     double tol;
 };
 
@@ -102,23 +103,43 @@ int egfPointIntersector_setNumberOfCellsPerBucket(egfPointIntersectorType** self
  	                                     	 const double p0[],
  	                                     	 const double p1[],
  	                                     	 const double p2[],
- 	                                     	 const double p3[]); 
+ 	                                     	 const double p3[]);
 
 /**
- * Get number of points found
+ * Get number of intersected cells 
  * @param self handle
- * @param numPoints (output)
+ * @param numCells number of cells (output)
  * @return 0 upon success
  */
- int egfPointIntersector_getNumberOfPoints(egfPointIntersectorType** self, int* numPoints);
+ int egfPointIntersector_getNumberOfCells(egfPointIntersectorType** self, int* numCells);
 
- /**
-  * Fill in points
-  * @param self handle
-  * @param point array (output)
-  * @return 0 upon success
-  */
- int egfPointIntersector_fillInPoints(egfPointIntersectorType** self, double* points);  
+/**
+ * Fill in the intersected cell Ids 
+ * @param self handle
+ * @param cellIds cell ids (output)
+ * @return 0 upon success
+ * @note caller allocates memory of cellids, size numCells
+ */
+ int egfPointIntersector_fillInCellIds(egfPointIntersectorType** self, int* cellIds);
+
+/**
+ * Get number of intersection points in cell 
+ * @param self handle
+ * @param cellId cell Id
+ * @param numPoints number of points (output)
+ * @return 0 upon success
+ */
+ int egfPointIntersector_getNumberOfPointsInCell(egfPointIntersectorType** self, int cellId, int* numPoints);
+
+/**
+ * Fill in the intersection points belonging to a cell 
+ * @param self handle
+ * @param cellId cell Id
+ * @param points as a flat array (output)
+ * @return 0 upon success
+ * @note caller allocates memory of points, size 3*numPoints
+ */
+ int egfPointIntersector_fillInPointsInCell(egfPointIntersectorType** self, int cellId, double* points);
 
 }
 

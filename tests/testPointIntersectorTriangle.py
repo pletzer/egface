@@ -67,17 +67,27 @@ assert ier == 0
 ier = lib.egfPointIntersector_print(byref(intrsctr))
 assert ier == 0
 
-# Check
-numPoints = c_int()
-ier = lib.egfPointIntersector_getNumberOfPoints(byref(intrsctr), byref(numPoints))
+# Run checks
+numCells = c_int()
+ier = lib.egfPointIntersector_getNumberOfCells(byref(intrsctr), byref(numCells))
 assert ier == 0
-print 'number of intersection points: ', numPoints.value
+print 'number of intersected cells: ', numCells.value
 
-# Fill in the intersection points
-points = numpy.zeros((3*numPoints.value,), numpy.float64)
-ier = lib.egfPointIntersector_fillInPoints(byref(intrsctr), points.ctypes.data_as(POINTER(c_double)))
+cellIds = numpy.zeros((numCells.value,), numpy.int)
+ier = lib.egfPointIntersector_fillInCellIds(byref(intrsctr), cellIds.ctypes.data_as(POINTER(c_int)))
 assert ier == 0
-print 'intersection points: \n', points.reshape((numPoints.value, 3))
+print 'intersected cells: ', cellIds
+
+numPoints = c_int()
+for cellId in cellIds:
+  ier = lib.egfPointIntersector_getNumberOfPointsInCell(byref(intrsctr), byref(numPoints))
+  assert ier == 0
+  print 'cell ', cellId, ' has ', numPoints.value
+  points = numpy.zeros((numPoints.value*3,), numpy.float64)
+  ier = lib.egfPointIntersector_fillInPointsInCell(byref(intrsctr), cellId, points.ctypes.data_as(POINTER(c_double)))
+  assert ier == 0
+  print 'intersection points'
+  print points.reshape((numPoints.value, 3))
 
 # Destructor
 ier = lib.egfPointIntersector_del(byref(intrsctr))
