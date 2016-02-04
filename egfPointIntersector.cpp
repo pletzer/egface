@@ -27,16 +27,17 @@ int egfPointIntersector_del(egfPointIntersectorType** self) {
 int egfPointIntersector_print(egfPointIntersectorType** self) {
 	std::cout << "egfPointIntersector:\n";
 	std::cout << "found " << (*self)->intersectPoints.size() << " cells\n";
-	for (std::map<vtkIdType, std::set<std::vector<double> > >::const_iterator p = (*self)->intersectPoints.begin(); 
-         p != (*self)->intersectPoints.end(); ++p) {
-        std::cout << "\tcell" << p->first << ' ';
-        for (std::set<std::vector<double> >::const_iterator it = p->second.begin(); it != p->second.end(); ++it) {
-            std::cout << "\t\tpoint ";
-            for (size_t j = 0; j < (*it).size(); ++j) {
-                std::cout << (*it)[j] << ", ";
+	for (std::map<vtkIdType, std::set<std::vector<double> > >::const_iterator
+          it = (*self)->intersectPoints.begin(); it != (*self)->intersectPoints.end(); ++it) { 
+            std::cout << "\tcell " << it->first << '\n';
+            for (std::set<std::vector<double> >::const_iterator
+              it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+                std::cout << "\t\tpoint ";
+                for (size_t j = 0; j < (*it2).size(); ++j) {
+                    std::cout << (*it2)[j] << ", ";
+                }
+                std::cout << '\n';
             }
-            std::cout << '\n';
-        }
 	}
     return 0;
 }
