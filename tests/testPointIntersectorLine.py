@@ -69,7 +69,7 @@ ier = lib.egfPointIntersector_getNumberOfCells(byref(intrsctr), byref(numCells))
 assert ier == 0
 print 'number of intersected cells: ', numCells.value
 
-cellIds = numpy.zeros((numCells.value,), numpy.int)
+cellIds = numpy.zeros((numCells.value,), numpy.int32)
 ier = lib.egfPointIntersector_fillInCellIds(byref(intrsctr), cellIds.ctypes.data_as(POINTER(c_int)))
 assert ier == 0
 print 'intersected cells: ', cellIds
