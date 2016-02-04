@@ -76,11 +76,13 @@ print 'intersected cells: ', cellIds
 
 numPoints = c_int()
 for cellId in cellIds:
-	ier = lib.egfPointIntersector_getNumberOfPointsInCell(byref(intrsctr), byref(numPoints))
+        ci = c_int(cellId)
+	ier = lib.egfPointIntersector_getNumberOfPointsInCell(byref(intrsctr), ci, byref(numPoints))
 	assert ier == 0
 	print 'cell ', cellId, ' has ', numPoints.value
 	points = numpy.zeros((numPoints.value*3,), numpy.float64)
-	ier = lib.egfPointIntersector_fillInPointsInCell(byref(intrsctr), cellId, points.ctypes.data_as(POINTER(c_double)))
+	ier = lib.egfPointIntersector_fillInPointsInCell(byref(intrsctr), ci, 
+                                                         points.ctypes.data_as(POINTER(c_double)))
 	assert ier == 0
 	print 'intersection points'
 	print points.reshape((numPoints.value, 3))
