@@ -127,8 +127,8 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
     // Build a one cell unstructured grid representing the line segment
     vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
     points->SetNumberOfPoints(2);
-    points->SetPoint(0, p0);
-    points->SetPoint(1, p1);
+    points->SetPoint(0, &pa[0]);
+    points->SetPoint(1, &pb[0]);
 
     vtkSmartPointer<vtkUnstructuredGrid> ug = vtkSmartPointer<vtkUnstructuredGrid>::New();
     ug->SetPoints(points);
@@ -143,8 +143,7 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
 
     // Find the cells along the line
     vtkSmartPointer<vtkIdList> cellIds = vtkSmartPointer<vtkIdList>::New();
-    (*self)->cellLocator->FindCellsAlongLine(const_cast<double*>(p0),
-                                             const_cast<double*>(p1),
+    (*self)->cellLocator->FindCellsAlongLine(&pa[0], &pb[0],
                                              (*self)->tol, cellIds);
 #ifdef DEBUG
     std::cerr << "===cellIds after find cells along line\n";
@@ -167,8 +166,7 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
         int numFaces = cell->GetNumberOfFaces();
         for (int k = 0; k < numFaces; ++k) {
             vtkCell* face = cell->GetFace(k);
-            int res = face->IntersectWithLine(const_cast<double*>(p0),
-                                              const_cast<double*>(p1),
+            int res = face->IntersectWithLine(&pa[0], &pb[0],
                                               (*self)->tol, t, &pt[0], 
                                               pcoords, subId);
             if (res) {
@@ -190,14 +188,14 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
     // Add the segment's vertices
     vtkIdType cellId;
     double weights[] = {0, 0, 0, 0, 0, 0, 0, 0}; // size = max number of nodes per cell
-    const double* endPoints[] = {p0, p1};
+    std::vector<double> endPoints[] = {pa, pb};
 
     // Iterate over the end points
     for (size_t k = 0; k < 2; ++k) {
-        const double* point = endPoints[k];
+        double* point = &(endPoints[k])[0];
 
         // Find the cell Id in the unstructured grid
-        cellId = (*self)->ugrid->FindCell((double*) point, NULL, 0, 
+        cellId = (*self)->ugrid->FindCell(point, NULL, 0, 
             (*self)->tol*(*self)->tol, subId, pcoords, weights);
         std::cerr << "cellId = " << cellId << '\n';
 
