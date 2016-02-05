@@ -239,7 +239,7 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
     // Compute the intersection between each grid cell face with the triangle's edges
     double t; // parametric position along the line
     std::vector<double> pt(3); // intersection point
-    double pcoords[] = {0, 0, 0}; // tetrahedron parametric coordinates
+    double pcoords[] = {0, 0, 0}; // triangle parametric coordinates
     int subId; // not used
     double* pa; // start point on the line
     double* pb; // end point of the line
@@ -330,16 +330,20 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
     }
 
     // Add all the grid cell vertices that are inside this triangle
-    double* closestPoint;
     double dist2;
+    std::vector<double> point(3);
+    std::vector<double> closestPoint(3);
     // Iterate over the grid cells
     for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
         std::set<std::vector<double> > s;
         vtkCell* cell = (*self)->ugrid->GetCell(cellIds->GetId(j));
         vtkIdType numPoints = cell->GetNumberOfPoints();
+        if (numPoints <= 1) {
+            continue;
+        }
         for (vtkIdType i = 0; i < numPoints; ++i) {
-            double* point = points->GetPoint(cell->GetPointId(i));
-            int res = tri->EvaluatePosition(point, closestPoint, subId, pcoords, dist2, weights);
+            points->GetPoint(cell->GetPointId(i), &point[0]);
+            int res = tri->EvaluatePosition(&point[0], &closestPoint[0], subId, pcoords, dist2, weights);
             bool inside = true;
             double sum = 0;
             for (size_t k = 0; k < 2; ++k) {
@@ -348,7 +352,7 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
                 sum += pcoords[k];
             }
             if (inside && sum < 1 + (*self)->tol) {
-                s.insert(std::vector<double>(point, point + 3));
+                s.insert(point);
             }
         }
         std::map<vtkIdType, std::set<std::vector<double> > >::iterator
