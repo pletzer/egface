@@ -51,6 +51,14 @@ add_test(NAME testPointIntersectorLineMarginalCxx
          COMMAND "${CMAKE_BINARY_DIR}/tests/testPointIntersectorLineMarginal"
          "${CMAKE_SOURCE_DIR}/data/ugridex.vtk")
 
+add_test(NAME testPointIntersectorLineSimple
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorLine.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
+         --p0 "-1, 0.4, 3" --p1 "2, 0.3, 0.2"
+         )
+
 add_test(NAME testPointIntersectorLineNoIntersection
          COMMAND "${PYTHON_EXECUTABLE}" 
          "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorLine.py"

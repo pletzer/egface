@@ -55,16 +55,13 @@ assert ier == 0
 p0 = numpy.array(eval(args.p0), numpy.float64)
 p1 = numpy.array(eval(args.p1), numpy.float64)
 print 'p0 = ', p0, ' p1 = ', p1
-print >> sys.stderr, '*** before gridWithLine'
 ier = lib.egfPointIntersector_gridWithLine(byref(intrsctr),
                                            p0.ctypes.data_as(POINTER(c_double)),
                                            p1.ctypes.data_as(POINTER(c_double)))
-print >> sys.stderr, '*** back from gridWithLine'
 assert ier == 0
 
 # Print the object
 ier = lib.egfPointIntersector_print(byref(intrsctr))
-print '*** back from print'
 assert ier == 0
 
 # Run checks
