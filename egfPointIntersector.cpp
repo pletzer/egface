@@ -502,7 +502,8 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
     }
 
     // Add all the grid cell vertices that are inside this tet
-    double* closestPoint;
+    std::vector<double> point(3);
+    std::vector<double> closestPoint(3);
     double dist2;
     // Iterate over the grid cells
     for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
@@ -510,8 +511,8 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
         vtkCell* cell = (*self)->ugrid->GetCell(cellIds->GetId(j));
         vtkIdType numPoints = cell->GetNumberOfPoints();
         for (vtkIdType i = 0; i < numPoints; ++i) {
-            double* point = points->GetPoint(cell->GetPointId(i));
-            int res = tet->EvaluatePosition(point, closestPoint, subId, pcoords, dist2, weights);
+            points->GetPoint(cell->GetPointId(i), &point[0]);
+            int res = tet->EvaluatePosition(&point[0], &closestPoint[0], subId, pcoords, dist2, weights);
             bool inside = true;
             double sum = 0;
             for (size_t k = 0; k < 3; ++k) {
@@ -520,7 +521,7 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
                 sum += pcoords[k];
             }
             if (inside && sum < 1 + (*self)->tol) {
-                s.insert(std::vector<double>(point, point + 3));
+                s.insert(point);
             }
         }
     }
