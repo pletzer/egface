@@ -168,7 +168,7 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
 
     // Add the segment's vertices
     vtkIdType cellId;
-    double weights[] = {0, 0, 0};
+    double weights[] = {0, 0, 0, 0, 0, 0, 0, 0}; // size = max number of nodes per cell
     const double* endPoints[] = {p0, p1};
 
     // Iterate over the end points
@@ -178,6 +178,7 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
         // Find the cell Id in the unstructured grid
         cellId = (*self)->ugrid->FindCell((double*) point, NULL, 0, 
             (*self)->tol*(*self)->tol, subId, pcoords, weights);
+        std::cerr << "cellId = " << cellId << '\n';
 
         if (cellId >= 0) {
 
@@ -197,9 +198,8 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
             }
         }
     }
-    //egfPointIntersector_print(self);
+
     (*self)->cleanIntersectPoints();
-    //egfPointIntersector_print(self);
 
     return 0;
 }
@@ -299,11 +299,11 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
 
     // Add the triangle's vertices
     vtkIdType cellId;
-    double weights[] = {0, 0, 0};
+    double weights[] = {0, 0, 0, 0, 0, 0, 0, 0}; // size = max number of nodes per cell
     const double* endPoints[] = {p0, p1, p2};
 
     // Iterate over the end points
-    for (size_t k = 0; k < 2; ++k) {
+    for (size_t k = 0; k < 3; ++k) {
         const double* point = endPoints[k];
 
         // Find the cell Id in the unstructured grid
@@ -467,11 +467,11 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
 
     // Add the tet's vertices
     vtkIdType cellId;
-    double weights[] = {0, 0, 0};
+    double weights[] = {0, 0, 0, 0, 0, 0, 0, 0}; // size = max number of nodes per cell
     const double* endPoints[] = {p0, p1, p2, p3};
 
     // Iterate over the end points
-    for (size_t k = 0; k < 2; ++k) {
+    for (size_t k = 0; k < 4; ++k) {
         const double* point = endPoints[k];
 
         // Find the cell Id in the unstructured grid

@@ -48,7 +48,6 @@ int egfGrid_loadFromFile(egfGridType** self, const char* filename) {
     reader->SetFileName(filename);
     reader->Update();
     (*self)->ugrid->DeepCopy(reader->GetOutput());
-    (*self)->ugrid->DeepCopy(reader->GetOutput());
 	return 0;
 }
 
