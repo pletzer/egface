@@ -6,6 +6,8 @@
 #include <iostream>
 #include <algorithm>
 
+#define DEBUG
+
 extern "C" {
 
 int egfPointIntersector_new(egfPointIntersectorType** self) {
@@ -107,7 +109,22 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
                                      const double p0[], 
                                      const double p1[]) {
 
-    // Construct triangle by building a one cell unstructured grid
+    std::vector<double> pa(p0, p0 + 3);
+    std::vector<double> pb(p1, p1 + 3);
+    double bounds[6];
+
+    // Truncate the segment if it goes beyond the grid bounds
+    (*self)->ugrid->GetBounds(bounds);
+    const double xmins[] = {bounds[0], bounds[2], bounds[4]};
+    const double xmaxs[] = {bounds[1], bounds[3], bounds[5]};
+    for (size_t j = 0; j < 3; ++j) {
+        pa[j] = (pa[j] < xmins[j]? xmins[j]: pa[j]);
+        pa[j] = (pa[j] > xmaxs[j]? xmaxs[j]: pa[j]);
+        pb[j] = (pb[j] < xmins[j]? xmins[j]: pb[j]);
+        pb[j] = (pb[j] > xmaxs[j]? xmaxs[j]: pb[j]);
+    }
+
+    // Build a one cell unstructured grid representing the line segment
     vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
     points->SetNumberOfPoints(2);
     points->SetPoint(0, p0);
@@ -125,10 +142,14 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
     ug->InsertNextCell(VTK_LINE, ptIds);
 
     // Find the cells along the line
-    vtkIdList* cellIds = vtkIdList::New();
+    vtkSmartPointer<vtkIdList> cellIds = vtkSmartPointer<vtkIdList>::New();
     (*self)->cellLocator->FindCellsAlongLine(const_cast<double*>(p0),
                                              const_cast<double*>(p1),
                                              (*self)->tol, cellIds);
+#ifdef DEBUG
+    std::cerr << "===cellIds after find cells along line\n";
+    cellIds->PrintSelf(std::cerr, vtkIndent(0));
+#endif
     if (cellIds->GetNumberOfIds() == 0) {
         // No intersection
         return 0;
