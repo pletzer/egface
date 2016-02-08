@@ -37,9 +37,7 @@ int main(int argc, char**argv) {
     // Compute all the intersection points
     const double p0[] = {1, 0.5, 0};
     const double p1[] = {1, 0.5, 6};
-    std::cerr << "*** entering gridWithLine\n";
     ier = egfPointIntersector_gridWithLine(&intrsctr, p0, p1);
-    std::cerr << "*** exiting gridWithLine\n";
 
     // Print the object
     ier = egfPointIntersector_print(&intrsctr);

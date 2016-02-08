@@ -58,6 +58,9 @@ add_test(NAME testPointIntersectorLineX
          --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
          --p0 "0, 0.4, 0.2" --p1 "1, 0.4, 0.2"
          )
+set_tests_properties(testPointIntersectorLineX 
+                     PROPERTIES 
+                     PASS_REGULAR_EXPRESSION "cell  0  has  2 intersection points")
 
 add_test(NAME testPointIntersectorLineY
          COMMAND "${PYTHON_EXECUTABLE}" 
@@ -66,6 +69,10 @@ add_test(NAME testPointIntersectorLineY
          --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
          --p0 "0.5, 0, 0.2" --p1 "0.5, 1, 0.2"
          )
+set_tests_properties(testPointIntersectorLineY
+                     PROPERTIES 
+                     PASS_REGULAR_EXPRESSION "cell  0  has  2 intersection points"
+                     PASS_REGULAR_EXPRESSION "cell  1  has  2 intersection points")
 
 add_test(NAME testPointIntersectorLineZ
          COMMAND "${PYTHON_EXECUTABLE}" 
@@ -74,6 +81,12 @@ add_test(NAME testPointIntersectorLineZ
          --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
          --p0 "0.5, 0.4, 0" --p1 "0.5, 0.4, 1"
          )
+set_tests_properties(testPointIntersectorLineZ
+                     PROPERTIES 
+                     PASS_REGULAR_EXPRESSION "cell  0  has  2 intersection points"
+                     PASS_REGULAR_EXPRESSION "cell  2  has  2 intersection points"
+                     PASS_REGULAR_EXPRESSION "cell  4  has  2 intersection points")
+
 
 add_test(NAME testPointIntersectorLineNoIntersection
          COMMAND "${PYTHON_EXECUTABLE}" 

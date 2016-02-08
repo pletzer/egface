@@ -208,37 +208,8 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
     }
 
     // Add the segment's vertices
-    vtkIdType cellId;
-    double weights[] = {0, 0, 0, 0, 0, 0, 0, 0}; // size = max number of nodes per cell
-    std::vector<double> endPoints[] = {pa, pb};
-
-    // Iterate over the end points
-    for (size_t k = 0; k < 2; ++k) {
-        std::vector<double>& point = endPoints[k];
-
-        // Find the cell Id in the unstructured grid
-        cellId = (*self)->ugrid->FindCell(&point[0], NULL, 0, 
-            (*self)->tol*(*self)->tol, subId, pcoords, weights);
-
-        if (cellId >= 0) {
-
-            // Is cellId a key?
-            std::map<vtkIdType, std::set<std::vector<double> > >::iterator
-              it = (*self)->intersectPoints.find(cellId);
-
-            if (it == (*self)->intersectPoints.end()) {
-                // No, create a set and insert it
-                std::set<std::vector<double> > pointsInCell;
-                pointsInCell.insert(point);
-                std::pair<vtkIdType, std::set<std::vector<double> > > cp(cellId, pointsInCell);
-                (*self)->intersectPoints.insert(cp);
-            }
-            else {
-                // Yes, insert the point
-                it->second.insert(point);
-            }
-        }
-    }
+    egfPointIntersector_gridWithPoint(self, p0);
+    egfPointIntersector_gridWithPoint(self, p1);
 
     return 0;
 }
