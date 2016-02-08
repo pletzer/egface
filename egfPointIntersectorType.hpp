@@ -16,6 +16,29 @@ struct egfPointIntersectorType {
     vtkCellLocator* cellLocator;
     std::map<vtkIdType, std::set<std::vector<double> > > intersectPoints;
     double tol;
+
+    void addEntry(vtkIdType cellId, const std::set<std::vector<double> >& pointsInCell) {
+            
+        if (pointsInCell.size() == 0) {
+            // Nothing to do
+            return;
+        }
+
+        // Is there an entry for cellId?
+        std::map<vtkIdType, std::set<std::vector<double> > >::iterator
+            it = this->intersectPoints.find(cellId);
+
+        if (it == this->intersectPoints.end()) {
+            // No, create a new entry and insert
+            std::pair<vtkIdType, std::set<std::vector<double> > > cp(cellId, pointsInCell);
+            this->intersectPoints.insert(cp);
+        }
+            else {
+            // Yes, insert
+            it->second.insert(pointsInCell.begin(), pointsInCell.end());
+        }
+
+    }
 };
 
 extern "C" {

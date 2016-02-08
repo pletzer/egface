@@ -184,18 +184,8 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
             }
         }
 
-        if (pointsInCell.size() == 0) continue;
+        (*self)->addEntry(cellId, pointsInCell);
 
-        std::map<vtkIdType, std::set<std::vector<double> > >::iterator
-          it = (*self)->intersectPoints.find(cellId);
-
-        if (it == (*self)->intersectPoints.end()) {
-            std::pair<vtkIdType, std::set<std::vector<double> > > cp(cellId, pointsInCell);
-            (*self)->intersectPoints.insert(cp);
-        }
-        else {
-            it->second.insert(pointsInCell.begin(), pointsInCell.end());
-        }
     }
 
     // Add the segment's vertices
@@ -301,17 +291,8 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
                 }
             }
 
-            if (pointsInCell.size() == 0) continue;
+            (*self)->addEntry(cellId, pointsInCell);
 
-            std::map<vtkIdType, std::set<std::vector<double> > >::iterator
-              it = (*self)->intersectPoints.find(cellId);
-            if (it == (*self)->intersectPoints.end()) {
-                std::pair<vtkIdType, std::set<std::vector<double> > > cp(cellId, pointsInCell);
-                (*self)->intersectPoints.insert(cp);
-            }
-            else {
-                it->second.insert(pointsInCell.begin(), pointsInCell.end());
-            }
         }
     }
 
@@ -335,17 +316,8 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
             }                
         }
 
-        if (pointsInCell.size() == 0) continue;
+        (*self)->addEntry(cellId, pointsInCell);
 
-        std::map<vtkIdType, std::set<std::vector<double> > >::iterator
-          it = (*self)->intersectPoints.find(cellId);
-        if (it == (*self)->intersectPoints.end()) {
-            std::pair<vtkIdType, std::set<std::vector<double> > > cp(cellId, pointsInCell);
-            (*self)->intersectPoints.insert(cp);
-        }
-        else {
-            it->second.insert(pointsInCell.begin(), pointsInCell.end());
-        }
     }
 
     // Add the triangle's vertices
@@ -410,17 +382,8 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
             }
         }
 
-        if (pointsInCell.size() == 0) continue;
+        (*self)->addEntry(cellId, pointsInCell);
 
-        std::map<vtkIdType, std::set<std::vector<double> > >::iterator
-          it = (*self)->intersectPoints.find(cellId);
-        if (it == (*self)->intersectPoints.end()) {
-            std::pair<vtkIdType, std::set<std::vector<double> > > cp(cellId, pointsInCell);
-            (*self)->intersectPoints.insert(cp);
-        }
-        else {
-            it->second.insert(pointsInCell.begin(), pointsInCell.end());
-        }
     }
 
     return 0;
@@ -495,18 +458,8 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
                 }
             }
 
-            if (pointsInCell.size() == 0) continue;
-
-            std::map<vtkIdType, std::set<std::vector<double> > >::iterator
-              it = (*self)->intersectPoints.find(cellId);
-            if (it == (*self)->intersectPoints.end()) {
-                std::pair<vtkIdType, std::set<std::vector<double> > > cp(cellId, pointsInCell);
-                (*self)->intersectPoints.insert(cp);
-            }
-            else {
-                it->second.insert(pointsInCell.begin(), pointsInCell.end());
-            }
-        }
+            (*self)->addEntry(cellId, pointsInCell);
+       }
     }
 
     // Compute the intersection between each grid cell edge and the tet's faces
@@ -532,17 +485,8 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
                 }                
             }
 
-            if (pointsInCell.size() == 0) continue;
+            (*self)->addEntry(cellId, pointsInCell);
 
-            std::map<vtkIdType, std::set<std::vector<double> > >::iterator
-              it = (*self)->intersectPoints.find(cellId);
-            if (it == (*self)->intersectPoints.end()) {
-                std::pair<vtkIdType, std::set<std::vector<double> > > cp(cellId, pointsInCell);
-                (*self)->intersectPoints.insert(cp);
-            }
-            else {
-                it->second.insert(pointsInCell.begin(), pointsInCell.end());
-            }
         }
     }
 
@@ -604,18 +548,9 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
                 pointsInCell.insert(point);
             }
         }
-            
-        if (pointsInCell.size() == 0) continue;
 
-        std::map<vtkIdType, std::set<std::vector<double> > >::iterator
-            it = (*self)->intersectPoints.find(cellId);
-        if (it == (*self)->intersectPoints.end()) {
-            std::pair<vtkIdType, std::set<std::vector<double> > > cp(cellId, pointsInCell);
-            (*self)->intersectPoints.insert(cp);
-        }
-        else {
-            it->second.insert(pointsInCell.begin(), pointsInCell.end());
-        }
+        (*self)->addEntry(cellId, pointsInCell);
+
     }
 
     return 0;
