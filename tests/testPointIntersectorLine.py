@@ -22,6 +22,8 @@ if os.uname()[0] == 'Darwin':
 elif os.uname()[0] == 'Windows':
     suffix = 'dll'
 
+ADD_END_POINTS = 1
+
 libName = 'libegface'
 # Open the shared library
 lib = cdll.LoadLibrary(args.build_dir + '/' + libName + '.' + suffix)
@@ -57,7 +59,8 @@ p1 = numpy.array(eval(args.p1), numpy.float64)
 print 'p0 = ', p0, ' p1 = ', p1
 ier = lib.egfPointIntersector_gridWithLine(byref(intrsctr),
                                            p0.ctypes.data_as(POINTER(c_double)),
-                                           p1.ctypes.data_as(POINTER(c_double)))
+                                           p1.ctypes.data_as(POINTER(c_double)), 
+                                           ADD_END_POINTS)
 assert ier == 0
 
 # Print the object

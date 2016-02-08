@@ -127,11 +127,13 @@ int egfPointIntersector_setNumberOfCellsPerBucket(egfPointIntersectorType** self
  * @param self handle
  * @param p0 first line vertex
  * @param p1 second line vertex
+ * @param addEndPoints whether (1) or not (0) the end points should be added
  * @return 0 upon success
  */
  int egfPointIntersector_gridWithLine(egfPointIntersectorType** self, 
  	                                  const double p0[],
- 	                                  const double p1[]); 
+ 	                                  const double p1[],
+                                      int addEndPoints); 
 
 /**
  * Find grid points intersecting with triangle
@@ -139,12 +141,14 @@ int egfPointIntersector_setNumberOfCellsPerBucket(egfPointIntersectorType** self
  * @param p0 first triangle vertex
  * @param p1 second triangle vertex
  * @param p2 third triangle vertex
+ * @param addEndPoints whether (1) or not (0) the end points should be added
  * @return 0 upon success
  */
  int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self, 
  	                                      const double p0[],
  	                                      const double p1[],
- 	                                      const double p2[]); 
+ 	                                      const double p2[],
+                                          int addEndPoints); 
 
 /**
  * Find grid points intersecting with tetrahedron

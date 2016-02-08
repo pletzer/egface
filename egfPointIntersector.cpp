@@ -126,7 +126,8 @@ int egfPointIntersector_gridWithPoint(egfPointIntersectorType** self,
 
 int egfPointIntersector_gridWithLine(egfPointIntersectorType** self, 
                                      const double p0[], 
-                                     const double p1[]) {
+                                     const double p1[], 
+                                     int addEndPoints) {
 
     std::vector<double> pa(p0, p0 + 3);
     std::vector<double> pb(p1, p1 + 3);
@@ -208,8 +209,11 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
     }
 
     // Add the segment's vertices
-    egfPointIntersector_gridWithPoint(self, p0);
-    egfPointIntersector_gridWithPoint(self, p1);
+    if (addEndPoints) {
+        // Add the triangle's vertices
+        egfPointIntersector_gridWithPoint(self, p0);
+        egfPointIntersector_gridWithPoint(self, p1);
+    }
 
     return 0;
 }
@@ -217,7 +221,8 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
 int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self, 
                                          const double p0[], 
                                          const double p1[], 
-                                         const double p2[]) {
+                                         const double p2[], 
+                                         int addEndPoints) {
 
     std::vector<double> pa(p0, p0 + 3);
     std::vector<double> pb(p1, p1 + 3);
@@ -318,14 +323,16 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
 
     // Compute the intersection between each grid cell face with 
     // the triangle's edges
-    egfPointIntersector_gridWithLine(self, p0, p1);
-    egfPointIntersector_gridWithLine(self, p1, p2);
-    egfPointIntersector_gridWithLine(self, p2, p0);
+    egfPointIntersector_gridWithLine(self, p0, p1, 0);
+    egfPointIntersector_gridWithLine(self, p1, p2, 0);
+    egfPointIntersector_gridWithLine(self, p2, p0, 0);
 
-    // Add the triangle's vertices
-    egfPointIntersector_gridWithPoint(self, p0);
-    egfPointIntersector_gridWithPoint(self, p1);
-    egfPointIntersector_gridWithPoint(self, p2);
+    if (addEndPoints) {
+        // Add the triangle's vertices
+        egfPointIntersector_gridWithPoint(self, p0);
+        egfPointIntersector_gridWithPoint(self, p1);
+        egfPointIntersector_gridWithPoint(self, p2);
+    }
 
     return 0;
 }
@@ -404,19 +411,20 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
 
     }
 
-    // Compute the intersection between each grid cell face with the tet's edges
-    egfPointIntersector_gridWithLine(self, p0, p1);
-    egfPointIntersector_gridWithLine(self, p1, p2);
-    egfPointIntersector_gridWithLine(self, p2, p0);
-    egfPointIntersector_gridWithLine(self, p0, p3);
-    egfPointIntersector_gridWithLine(self, p1, p3);
-    egfPointIntersector_gridWithLine(self, p2, p3);
-
     // Compute the intersection between each grid cell edge and the tet's faces
-    egfPointIntersector_gridWithTriangle(self, p0, p1, p2);
-    egfPointIntersector_gridWithTriangle(self, p1, p2, p3);
-    egfPointIntersector_gridWithTriangle(self, p2, p0, p3);
-    egfPointIntersector_gridWithTriangle(self, p0, p1, p3);
+    egfPointIntersector_gridWithTriangle(self, p0, p1, p2, 0);
+    egfPointIntersector_gridWithTriangle(self, p1, p2, p3, 0);
+    egfPointIntersector_gridWithTriangle(self, p2, p0, p3, 0);
+    egfPointIntersector_gridWithTriangle(self, p0, p1, p3, 0);
+
+    // Compute the intersection between each grid cell face with the tet's edges
+    egfPointIntersector_gridWithLine(self, p0, p1, 0);
+    egfPointIntersector_gridWithLine(self, p1, p2, 0);
+    egfPointIntersector_gridWithLine(self, p2, p0, 0);
+    egfPointIntersector_gridWithLine(self, p0, p3, 0);
+    egfPointIntersector_gridWithLine(self, p1, p3, 0);
+    egfPointIntersector_gridWithLine(self, p2, p3, 0);
+
 
     // Add the tet's vertices
     egfPointIntersector_gridWithPoint(self, p0);

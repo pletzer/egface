@@ -6,6 +6,8 @@
 #include <egfPointIntersectorType.hpp>
 
 int main(int argc, char**argv) {
+
+    const int ADD_END_POINTS = 1;
     
     if (argc < 2) {
         std::cout << "ERROR: Must provide path to vtk file\n";
@@ -37,7 +39,7 @@ int main(int argc, char**argv) {
     // Compute all the intersection points
     const double p0[] = {1, 0.5, 0};
     const double p1[] = {1, 0.5, 6};
-    ier = egfPointIntersector_gridWithLine(&intrsctr, p0, p1);
+    ier = egfPointIntersector_gridWithLine(&intrsctr, p0, p1, ADD_END_POINTS);
 
     // Print the object
     ier = egfPointIntersector_print(&intrsctr);
