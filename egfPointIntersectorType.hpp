@@ -16,14 +16,6 @@ struct egfPointIntersectorType {
     vtkCellLocator* cellLocator;
     std::map<vtkIdType, std::set<std::vector<double> > > intersectPoints;
     double tol;
-    void cleanIntersectPoints() {
-    	for (std::map<vtkIdType, std::set<std::vector<double> > >::iterator 
-    		it = intersectPoints.begin(); it != intersectPoints.end(); ++it) {
-    		if (it->second.size() == 0) {
-    			intersectPoints.erase(it);
-    		}
-    	}
-    }
 };
 
 extern "C" {

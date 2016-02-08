@@ -184,6 +184,8 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
             }
         }
 
+        if (pointsInCell.size() == 0) continue;
+
         std::map<vtkIdType, std::set<std::vector<double> > >::iterator
           it = (*self)->intersectPoints.find(cellId);
 
@@ -217,9 +219,10 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
 
             if (it == (*self)->intersectPoints.end()) {
                 // No, create a set and insert it
-                std::set<std::vector<double> > s;
-                s.insert(point);
-                (*self)->intersectPoints.insert(std::pair<vtkIdType, std::set<std::vector<double> > >(cellId, s));
+                std::set<std::vector<double> > pointsInCell;
+                pointsInCell.insert(point);
+                std::pair<vtkIdType, std::set<std::vector<double> > > cp(cellId, pointsInCell);
+                (*self)->intersectPoints.insert(cp);
             }
             else {
                 // Yes, insert the point
@@ -227,8 +230,6 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
             }
         }
     }
-
-    (*self)->cleanIntersectPoints();
 
     return 0;
 }
@@ -300,6 +301,8 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
                 }
             }
 
+            if (pointsInCell.size() == 0) continue;
+
             std::map<vtkIdType, std::set<std::vector<double> > >::iterator
               it = (*self)->intersectPoints.find(cellId);
             if (it == (*self)->intersectPoints.end()) {
@@ -331,6 +334,8 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
                 pointsInCell.insert(pt);
             }                
         }
+
+        if (pointsInCell.size() == 0) continue;
 
         std::map<vtkIdType, std::set<std::vector<double> > >::iterator
           it = (*self)->intersectPoints.find(cellId);
@@ -404,6 +409,9 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
                 pointsInCell.insert(point);
             }
         }
+
+        if (pointsInCell.size() == 0) continue;
+
         std::map<vtkIdType, std::set<std::vector<double> > >::iterator
           it = (*self)->intersectPoints.find(cellId);
         if (it == (*self)->intersectPoints.end()) {
@@ -414,8 +422,6 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
             it->second.insert(pointsInCell.begin(), pointsInCell.end());
         }
     }
-
-    (*self)->cleanIntersectPoints();
 
     return 0;
 }
@@ -488,6 +494,9 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
                     pointsInCell.insert(pt);
                 }
             }
+
+            if (pointsInCell.size() == 0) continue;
+
             std::map<vtkIdType, std::set<std::vector<double> > >::iterator
               it = (*self)->intersectPoints.find(cellId);
             if (it == (*self)->intersectPoints.end()) {
@@ -522,6 +531,9 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
                     pointsInCell.insert(pt);
                 }                
             }
+
+            if (pointsInCell.size() == 0) continue;
+
             std::map<vtkIdType, std::set<std::vector<double> > >::iterator
               it = (*self)->intersectPoints.find(cellId);
             if (it == (*self)->intersectPoints.end()) {
@@ -592,9 +604,19 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
                 pointsInCell.insert(point);
             }
         }
-    }
+            
+        if (pointsInCell.size() == 0) continue;
 
-    (*self)->cleanIntersectPoints();
+        std::map<vtkIdType, std::set<std::vector<double> > >::iterator
+            it = (*self)->intersectPoints.find(cellId);
+        if (it == (*self)->intersectPoints.end()) {
+            std::pair<vtkIdType, std::set<std::vector<double> > > cp(cellId, pointsInCell);
+            (*self)->intersectPoints.insert(cp);
+        }
+        else {
+            it->second.insert(pointsInCell.begin(), pointsInCell.end());
+        }
+    }
 
     return 0;
 }
