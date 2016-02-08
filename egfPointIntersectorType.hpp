@@ -12,11 +12,36 @@
 #include <set>
 
 struct egfPointIntersectorType {
+
+    // source grid
 	vtkUnstructuredGrid* ugrid;
+
+    // cell finder
     vtkCellLocator* cellLocator;
+
+    // collection of intersection points for each source grid cell
     std::map<vtkIdType, std::set<std::vector<double> > > intersectPoints;
     double tol;
 
+    // Add a single point
+    void addEntry(vtkIdType cellId, const std::vector<double>& point) {
+
+        // Is there an entry for cellId?
+        std::map<vtkIdType, std::set<std::vector<double> > >::iterator
+            it = this->intersectPoints.find(cellId);
+
+        if (it == this->intersectPoints.end()) {
+            std::set<std::vector<double> > pointsInCell;
+            pointsInCell.insert(point);
+            std::pair<vtkIdType, std::set<std::vector<double> > > cp(cellId, pointsInCell);
+            this->intersectPoints.insert(cp);
+        }
+        else {
+            it->second.insert(point);
+        }
+    }
+
+    // Add a collection of points to the map
     void addEntry(vtkIdType cellId, const std::set<std::vector<double> >& pointsInCell) {
             
         if (pointsInCell.size() == 0) {
@@ -89,11 +114,19 @@ int egfPointIntersector_setTolerance(egfPointIntersectorType** self, double tol)
 int egfPointIntersector_setNumberOfCellsPerBucket(egfPointIntersectorType** self, int numCells);
 
 /**
+ * Find source grid cell containing point
+ * @param self handle
+ * @param p0 vertex
+ * @return 0 upon success
+ */
+ int egfPointIntersector_gridWithPoint(egfPointIntersectorType** self, 
+                                      const double p0[]); 
+
+/**
  * Find grid points intersecting with line segment
  * @param self handle
- * @param p0 first tetrahedron vertex
- * @param p1 second tetrahedron vertex
- * @param p2 third tetrahedron vertex
+ * @param p0 first line vertex
+ * @param p1 second line vertex
  * @return 0 upon success
  */
  int egfPointIntersector_gridWithLine(egfPointIntersectorType** self, 
@@ -103,9 +136,9 @@ int egfPointIntersector_setNumberOfCellsPerBucket(egfPointIntersectorType** self
 /**
  * Find grid points intersecting with triangle
  * @param self handle
- * @param p0 first tetrahedron vertex
- * @param p1 second tetrahedron vertex
- * @param p2 third tetrahedron vertex
+ * @param p0 first triangle vertex
+ * @param p1 second triangle vertex
+ * @param p2 third triangle vertex
  * @return 0 upon success
  */
  int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self, 

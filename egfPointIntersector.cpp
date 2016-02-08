@@ -104,6 +104,25 @@ int egfPointIntersector_setNumberOfCellsPerBucket(egfPointIntersectorType** self
     return 0;
 }
 
+int egfPointIntersector_gridWithPoint(egfPointIntersectorType** self, 
+                                     const double p0[]) {
+
+    double dist2;
+    std::vector<double> point(p0, p0 + 3);
+    std::vector<double> closestPoint(3);
+    double tol2 = (*self)->tol * (*self)->tol;
+    int subId;
+    double pcoords[] = {0., 0., 0.};
+    double weights[] = {0., 0., 0., 0., 0., 0., 0., 0.};
+    vtkIdType cellId = (*self)->ugrid->FindCell(&point[0], NULL, 0, 
+        tol2, subId, pcoords, weights);
+    if (cellId >= 0) {
+        (*self)->addEntry(cellId, point);
+    }
+
+    return 0;
+
+}
 
 int egfPointIntersector_gridWithLine(egfPointIntersectorType** self, 
                                      const double p0[], 
