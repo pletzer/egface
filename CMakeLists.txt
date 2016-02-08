@@ -51,6 +51,41 @@ add_test(NAME testPointIntersectorLineMarginalCxx
          COMMAND "${CMAKE_BINARY_DIR}/tests/testPointIntersectorLineMarginal"
          "${CMAKE_SOURCE_DIR}/data/ugridex.vtk")
 
+add_test(NAME testPointIntersectorPoint0
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorPoint.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
+         --p0 "0.5, 0.2, 1"
+         )
+set_tests_properties(testPointIntersectorPoint0
+                     PROPERTIES 
+                     PASS_REGULAR_EXPRESSION "cell  0  has  1 intersection points")
+
+add_test(NAME testPointIntersectorPoint1
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorPoint.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
+         --p0 "0.5, 0.8, 1"
+         )
+set_tests_properties(testPointIntersectorPoint1
+                     PROPERTIES 
+                     PASS_REGULAR_EXPRESSION "cell  1  has  1 intersection points")
+
+add_test(NAME testPointIntersectorPoint2
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorPoint.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
+         --p0 "0.5, 0.5, 5"
+         )
+set_tests_properties(testPointIntersectorPoint2 
+                     PROPERTIES 
+                     PASS_REGULAR_EXPRESSION "cell  4  has  1 intersection points"
+                     PASS_REGULAR_EXPRESSION "cell  5  has  1 intersection points")
+
+
 add_test(NAME testPointIntersectorLineX
          COMMAND "${PYTHON_EXECUTABLE}" 
          "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorLine.py"
