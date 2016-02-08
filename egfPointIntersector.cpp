@@ -327,8 +327,6 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
     egfPointIntersector_gridWithPoint(self, p1);
     egfPointIntersector_gridWithPoint(self, p2);
 
-
-
     return 0;
 }
 
@@ -371,100 +369,10 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
         return 0;
     }
 
-    // Compute the intersection between each grid cell face with the tet's edges
-    double t; // parametric position along the line
-    std::vector<double> pt(3); // intersection point
     double pcoords[] = {0, 0, 0}; // tetrahedron parametric coordinates
     int subId; // not used
-    std::vector<double> pBeg(3);
-    std::vector<double> pEnd(3);
     vtkCell* tet = ug->GetCell(0);
-    int numEdges = tet->GetNumberOfEdges();
-    for (int i = 0; i < numEdges; ++i) {
-        vtkCell* edge = tet->GetEdge(i);
-        vtkIdType iBeg = edge->GetPointId(0);
-        vtkIdType iEnd = edge->GetPointId(1);
-        points->GetPoint(iBeg, &pBeg[0]);
-        points->GetPoint(iEnd, &pEnd[0]);
-        // Iterate over the grid cells in the box
-        for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
-            vtkIdType cellId = cellIds->GetId(j);
-            std::set<std::vector<double> > pointsInCell;
-            vtkCell* cell = (*self)->ugrid->GetCell(cellId);
-            int numFaces = cell->GetNumberOfFaces();
-            for (int k = 0; k < numFaces; ++k) {
-                vtkCell* face = cell->GetFace(k);
-                int res = face->IntersectWithLine(&pBeg[0], &pEnd[0], 
-                    (*self)->tol, t, &pt[0], pcoords, subId);
-                if (res) {
-                    pointsInCell.insert(pt);
-                }
-            }
-
-            (*self)->addEntry(cellId, pointsInCell);
-       }
-    }
-
-    // Compute the intersection between each grid cell edge and the tet's faces
-    int numFaces = tet->GetNumberOfFaces();
-    for (int i = 0; i < numFaces; ++i) {
-        vtkCell* face = tet->GetFace(i);
-        // Iterate over the grid cells in the box
-        for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
-            vtkIdType cellId = cellIds->GetId(j);
-            std::set<std::vector<double> > pointsInCell;
-            vtkCell* cell = (*self)->ugrid->GetCell(cellId);
-            int numEdges = cell->GetNumberOfEdges();
-            for (int k = 0; k < numEdges; ++k) {
-                vtkCell* edge = cell->GetEdge(k);
-                vtkIdType iBeg = edge->GetPointId(0);
-                vtkIdType iEnd = edge->GetPointId(1);
-                points->GetPoint(iBeg, &pBeg[0]);
-                points->GetPoint(iEnd, &pEnd[0]);
-                int res = face->IntersectWithLine(&pBeg[0], &pEnd[0], 
-                    (*self)->tol, t, &pt[0], pcoords, subId);
-                if (res) {
-                    pointsInCell.insert(pt);
-                }                
-            }
-
-            (*self)->addEntry(cellId, pointsInCell);
-
-        }
-    }
-
-    // Add the tet's vertices
-    vtkIdType cellId;
-    double weights[] = {0, 0, 0, 0, 0, 0, 0, 0}; // size = max number of nodes per cell
-    std::vector<double> endPoints[] = {pa, pb, pc, pd};
-
-    // Iterate over the end points
-    for (size_t k = 0; k < 4; ++k) {
-        std::vector<double>& point = endPoints[k];
-
-        // Find the cell Id in the unstructured grid
-        cellId = (*self)->ugrid->FindCell(&point[0], NULL, 0, 
-            (*self)->tol*(*self)->tol, subId, pcoords, weights);
-
-        if (cellId >= 0) {
-
-            // Is cellId a key?
-            std::map<vtkIdType, std::set<std::vector<double> > >::iterator
-              it = (*self)->intersectPoints.find(cellId);
-
-            if (it == (*self)->intersectPoints.end()) {
-                // No, create a set and insert it
-                std::set<std::vector<double> > pointsInCell;
-                pointsInCell.insert(point);
-                std::pair<vtkIdType, std::set<std::vector<double> > > cp(cellId, pointsInCell);
-                (*self)->intersectPoints.insert(cp);
-            }
-            else {
-                // Yes, insert the point
-                it->second.insert(point);
-            }
-        }
-    }
+    double weights[8]; // size is max number of nodes per cell
 
     // Add all the grid cell vertices that are inside this tet
     std::vector<double> point(3);
@@ -495,6 +403,26 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
         (*self)->addEntry(cellId, pointsInCell);
 
     }
+
+    // Compute the intersection between each grid cell face with the tet's edges
+    egfPointIntersector_gridWithLine(self, p0, p1);
+    egfPointIntersector_gridWithLine(self, p1, p2);
+    egfPointIntersector_gridWithLine(self, p2, p0);
+    egfPointIntersector_gridWithLine(self, p0, p3);
+    egfPointIntersector_gridWithLine(self, p1, p3);
+    egfPointIntersector_gridWithLine(self, p2, p3);
+
+    // Compute the intersection between each grid cell edge and the tet's faces
+    egfPointIntersector_gridWithTriangle(self, p0, p1, p2);
+    egfPointIntersector_gridWithTriangle(self, p1, p2, p3);
+    egfPointIntersector_gridWithTriangle(self, p2, p0, p3);
+    egfPointIntersector_gridWithTriangle(self, p0, p1, p3);
+
+    // Add the tet's vertices
+    egfPointIntersector_gridWithPoint(self, p0);
+    egfPointIntersector_gridWithPoint(self, p1);
+    egfPointIntersector_gridWithPoint(self, p2);
+    egfPointIntersector_gridWithPoint(self, p3);
 
     return 0;
 }
