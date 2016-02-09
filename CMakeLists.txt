@@ -159,8 +159,8 @@ add_test(NAME testPointIntersectorTriangle3IntersectPoints
          COMMAND "${PYTHON_EXECUTABLE}" 
          "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorTriangle.py"
          --build_dir ${CMAKE_BINARY_DIR}
-         --input "${CMAKE_SOURCE_DIR}/data/ugridex.vtk"
-         --p0 "0.5, 0.2, 1" --p1 "0.5, 0.8, 1" --p2 "0.5, 0.5, 5"
+         --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
+         --p0 "0.5, 0.2, 0.3" --p1 "0.5, 0.8, 0.3" --p2 "0.5, 0.5, 0.7"
          )
 
 add_test(NAME testPointIntersectorTriangleOutside

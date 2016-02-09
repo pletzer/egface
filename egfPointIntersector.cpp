@@ -142,7 +142,6 @@ int egfPointIntersector_gridWithPoint(egfPointIntersectorType** self,
         }
     }
 
-
     return 0;
 
 }
@@ -240,6 +239,7 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
                                          const double p2[], 
                                          int addEndPoints) {
 
+    // Copy the points so we can pass double* arrays, which VTK expects
     std::vector<double> pa(p0, p0 + 3);
     std::vector<double> pb(p1, p1 + 3);
     std::vector<double> pc(p2, p2 + 3);
@@ -267,7 +267,7 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
     vtkSmartPointer<vtkIdList> cellIds = vtkSmartPointer<vtkIdList>::New();
     (*self)->cellLocator->FindCellsWithinBounds(bbox, cellIds);
     if (cellIds->GetNumberOfIds() == 0) {
-        // No intersection
+        // No intersection possible
         return 0;
     }
 
@@ -279,7 +279,7 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
     std::vector<double> pEnd(3); // end point of the line
     vtkCell* tri = ug->GetCell(0);
 
-    // Compute the intersection between each grid cell edge with the triangle
+    // Compute the intersection between each cell edge with the triangle
     // Iterate over the grid cells in the box
     for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
         vtkIdType cellId = cellIds->GetId(j);
@@ -303,45 +303,12 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
 
     }
 
-    // Add all the grid cell vertices that are inside this triangle
-    double dist2;
-    std::vector<double> point(3);
-    std::vector<double> closestPoint(3);
-    double weights[8]; // size if max number of nodes per cell
-    // Iterate over the grid cells
-    for (vtkIdType j = 0; j < cellIds->GetNumberOfIds(); ++j) {
-        vtkIdType cellId = cellIds->GetId(j);
-        std::set<std::vector<double> > pointsInCell;
-        vtkCell* cell = (*self)->ugrid->GetCell(cellId);
-        vtkIdType numPoints = cell->GetNumberOfPoints();
-        if (numPoints <= 1) {
-            continue;
-        }
-        for (vtkIdType i = 0; i < numPoints; ++i) {
-            points->GetPoint(cell->GetPointId(i), &point[0]);
-            int res = tri->EvaluatePosition(&point[0], &closestPoint[0],
-                subId, pcoords, dist2, weights);
-            bool inside = true;
-            double sum = 0;
-            for (size_t k = 0; k < 2; ++k) {
-                inside &= pcoords[k] > -(*self)->tol;
-                inside &= pcoords[k] < 1 + (*self)->tol;
-                sum += pcoords[k];
-            }
-            if (inside && sum < 1 + (*self)->tol) {
-                pointsInCell.insert(point);
-            }
-        }
-
-        (*self)->addEntry(cellId, pointsInCell);
-
-    }
-
     // Compute the intersection between each grid cell face with 
     // the triangle's edges
-    egfPointIntersector_gridWithLine(self, p0, p1, 0);
-    egfPointIntersector_gridWithLine(self, p1, p2, 0);
-    egfPointIntersector_gridWithLine(self, p2, p0, 0);
+    const int NOT_ADD_VERTEX_POINTS = 0;
+    egfPointIntersector_gridWithLine(self, p0, p1, NOT_ADD_VERTEX_POINTS);
+    egfPointIntersector_gridWithLine(self, p1, p2, NOT_ADD_VERTEX_POINTS);
+    egfPointIntersector_gridWithLine(self, p2, p0, NOT_ADD_VERTEX_POINTS);
 
     if (addEndPoints) {
         // Add the triangle's vertices
