@@ -172,6 +172,24 @@ set_tests_properties(testPointIntersectorTriangleSimple
                      PASS_REGULAR_EXPRESSION "cell  5  has  3 intersection points"
                      )
 
+add_test(NAME testPointIntersectorTetrahedronSimple
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorTetrahedron.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
+         --p0 "0, 0, 0" --p1 "1, 0.5, 0" --p2 "0, 1, 0" --p3 "0, 0.5, 1"
+         )
+set_tests_properties(testPointIntersectorTetrahedronSimple
+                     PROPERTIES 
+                     PASS_REGULAR_EXPRESSION "cell  0  has  6 intersection points"
+                     PASS_REGULAR_EXPRESSION "cell  1  has  6 intersection points"
+                     PASS_REGULAR_EXPRESSION "cell  2  has  9 intersection points"
+                     PASS_REGULAR_EXPRESSION "cell  3  has  9 intersection points"
+                     PASS_REGULAR_EXPRESSION "cell  4  has  8 intersection points"
+                     PASS_REGULAR_EXPRESSION "cell  5  has  8 intersection points"
+                     )
+
+
 add_test(NAME testPointIntersectorTriangleOutside
          COMMAND "${PYTHON_EXECUTABLE}" 
          "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorTriangle.py"
