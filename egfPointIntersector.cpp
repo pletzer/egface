@@ -290,8 +290,8 @@ int egfPointIntersector_gridWithTriangle(egfPointIntersectorType** self,
             vtkCell* edge = cell->GetEdge(k);
             vtkIdType iBeg = edge->GetPointId(0);
             vtkIdType iEnd = edge->GetPointId(1);
-            points->GetPoint(iBeg, &pBeg[0]);
-            points->GetPoint(iEnd, &pEnd[0]);
+            (*self)->ugrid->GetPoints()->GetPoint(iBeg, &pBeg[0]);
+            (*self)->ugrid->GetPoints()->GetPoint(iEnd, &pEnd[0]);
             int res = tri->IntersectWithLine(&pBeg[0], &pEnd[0], 
                 (*self)->tol, t, &pt[0], pcoords, subId);
             if (res) {
