@@ -105,7 +105,7 @@ int egfPointIntersector_setNumberOfCellsPerBucket(egfPointIntersectorType** self
 }
 
 int egfPointIntersector_gridWithPoint(egfPointIntersectorType** self, 
-                                     const double p0[]) {
+                                      const double p0[]) {
 
     double dist2;
     std::vector<double> point(p0, p0 + 3);
@@ -118,7 +118,30 @@ int egfPointIntersector_gridWithPoint(egfPointIntersectorType** self,
         tol2, subId, pcoords, weights);
     if (cellId >= 0) {
         (*self)->addEntry(cellId, point);
+
+        // Also search among neighbors since the point my be shared
+        vtkCell* cell = (*self)->ugrid->GetCell(cellId);
+        vtkIdList* ptIds = cell->GetPointIds();
+        vtkIdType numPoints = ptIds->GetNumberOfIds();
+        vtkSmartPointer<vtkIdList> neighborCellIds = vtkSmartPointer<vtkIdList>::New();
+        vtkSmartPointer<vtkIdList> sharedPtIds = vtkSmartPointer<vtkIdList>::New();
+        sharedPtIds->SetNumberOfIds(1);
+        for (vtkIdType i = 0; i < numPoints; ++i) {
+            sharedPtIds->SetId(0, ptIds->GetId(i));
+            (*self)->ugrid->GetCellNeighbors(cellId, sharedPtIds, neighborCellIds);
+            vtkIdType numNeighborCells = neighborCellIds->GetNumberOfIds();
+            for (vtkIdType j = 0; j < numNeighborCells; ++j) {
+                vtkIdType neighborCellId = neighborCellIds->GetId(j);
+                vtkCell* neighborCell = (*self)->ugrid->GetCell(neighborCellId);
+                vtkIdType cellId2 = (*self)->ugrid->FindCell(&point[0], 
+                    neighborCell, neighborCellId, tol2, subId, pcoords, weights);
+                if (cellId2 >= 0) {
+                    (*self)->addEntry(cellId2, point);
+                }
+            }
+        }
     }
+
 
     return 0;
 
@@ -165,13 +188,6 @@ int egfPointIntersector_gridWithLine(egfPointIntersectorType** self,
     vtkSmartPointer<vtkIdList> cellIds = vtkSmartPointer<vtkIdList>::New();
     (*self)->cellLocator->FindCellsAlongLine(&pa[0], &pb[0],
                                              (*self)->tol, cellIds);
-#ifdef DEBUG
-    std::cerr << "===cellIds after find cells along line\n";
-    for (vtkIdType i = 0; i < cellIds->GetNumberOfIds(); ++i) {
-        std::cerr << cellIds->GetId(i) << '\n';
-    }
-    cellIds->PrintSelf(std::cerr, vtkIndent(0));
-#endif
     if (cellIds->GetNumberOfIds() == 0) {
         // No intersection
         return 0;

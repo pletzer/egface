@@ -111,7 +111,8 @@ int egfPointIntersector_setTolerance(egfPointIntersectorType** self, double tol)
  * @param numCells number of cells
  * @return 0 upon success
  */
-int egfPointIntersector_setNumberOfCellsPerBucket(egfPointIntersectorType** self, int numCells);
+int egfPointIntersector_setNumberOfCellsPerBucket(egfPointIntersectorType** self, 
+                                                  int numCells);
 
 /**
  * Find source grid cell containing point
@@ -120,7 +121,7 @@ int egfPointIntersector_setNumberOfCellsPerBucket(egfPointIntersectorType** self
  * @return 0 upon success
  */
  int egfPointIntersector_gridWithPoint(egfPointIntersectorType** self, 
-                                      const double p0[]); 
+                                       const double p0[]); 
 
 /**
  * Find grid points intersecting with line segment

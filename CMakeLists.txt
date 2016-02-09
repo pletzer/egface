@@ -56,7 +56,7 @@ add_test(NAME testPointIntersectorPoint0
          "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorPoint.py"
          --build_dir ${CMAKE_BINARY_DIR}
          --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
-         --p0 "0.5, 0.2, 1"
+         --p0 "0.5, 0.2, 0.3"
          )
 set_tests_properties(testPointIntersectorPoint0
                      PROPERTIES 
@@ -67,7 +67,7 @@ add_test(NAME testPointIntersectorPoint1
          "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorPoint.py"
          --build_dir ${CMAKE_BINARY_DIR}
          --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
-         --p0 "0.5, 0.8, 1"
+         --p0 "0.5, 0.8, 0.3"
          )
 set_tests_properties(testPointIntersectorPoint1
                      PROPERTIES 
@@ -78,7 +78,7 @@ add_test(NAME testPointIntersectorPoint2
          "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorPoint.py"
          --build_dir ${CMAKE_BINARY_DIR}
          --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
-         --p0 "0.5, 0.5, 5"
+         --p0 "0.5, 0.5, 0.7"
          )
 set_tests_properties(testPointIntersectorPoint2 
                      PROPERTIES 
