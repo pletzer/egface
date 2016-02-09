@@ -375,7 +375,7 @@ int egfPointIntersector_gridWithTetrahedron(egfPointIntersectorType** self,
         vtkCell* cell = (*self)->ugrid->GetCell(cellId);
         vtkIdType numPoints = cell->GetNumberOfPoints();
         for (vtkIdType i = 0; i < numPoints; ++i) {
-            points->GetPoint(cell->GetPointId(i), &point[0]);
+            (*self)->ugrid->GetPoints()->GetPoint(cell->GetPointId(i), &point[0]);
             int res = tet->EvaluatePosition(&point[0], &closestPoint[0], 
                 subId, pcoords, dist2, weights);
             bool inside = true;
