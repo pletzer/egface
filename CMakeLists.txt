@@ -155,13 +155,22 @@ add_test(NAME testPointIntersectorLineInside
          --p0 "1, 0.5, 0.001" --p1 "1, 0.5, 5.999"
          )
 
-add_test(NAME testPointIntersectorTriangle3IntersectPoints
+add_test(NAME testPointIntersectorTriangleSimple
          COMMAND "${PYTHON_EXECUTABLE}" 
          "${CMAKE_SOURCE_DIR}/tests/testPointIntersectorTriangle.py"
          --build_dir ${CMAKE_BINARY_DIR}
          --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
          --p0 "0.5, 0.2, 0.3" --p1 "0.5, 0.8, 0.3" --p2 "0.5, 0.5, 0.7"
          )
+set_tests_properties(testPointIntersectorTriangleSimple
+                     PROPERTIES 
+                     PASS_REGULAR_EXPRESSION "cell  0  has  4 intersection points"
+                     PASS_REGULAR_EXPRESSION "cell  1  has  4 intersection points"
+                     PASS_REGULAR_EXPRESSION "cell  2  has  4 intersection points"
+                     PASS_REGULAR_EXPRESSION "cell  3  has  4 intersection points"
+                     PASS_REGULAR_EXPRESSION "cell  4  has  3 intersection points"
+                     PASS_REGULAR_EXPRESSION "cell  5  has  3 intersection points"
+                     )
 
 add_test(NAME testPointIntersectorTriangleOutside
          COMMAND "${PYTHON_EXECUTABLE}" 
