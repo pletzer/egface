@@ -50,6 +50,9 @@ add_test(NAME testCellLocator
 add_test(NAME testPointIntersectorLineMarginalCxx
          COMMAND "${CMAKE_BINARY_DIR}/tests/testPointIntersectorLineMarginal"
          "${CMAKE_SOURCE_DIR}/data/ugridex.vtk")
+set_tests_properties(testPointIntersectorLineMarginalCxx
+                     PROPERTIES 
+                     PASS_REGULAR_EXPRESSION "has [^013456789] points")
 
 add_test(NAME testPointIntersectorPoint0
          COMMAND "${PYTHON_EXECUTABLE}" 
@@ -138,6 +141,9 @@ add_test(NAME testPointIntersectorLine2
          --input "${CMAKE_SOURCE_DIR}/data/ugridex.vtk"
          --p0 "1, 0.5, -1" --p1 "1, 0.5, 7"
          )
+set_tests_properties(testPointIntersectorLine2
+                     PROPERTIES 
+                     PASS_REGULAR_EXPRESSION "has [^013456789] points")
 
 add_test(NAME testPointIntersectorLineMarginal
          COMMAND "${PYTHON_EXECUTABLE}" 
@@ -146,6 +152,9 @@ add_test(NAME testPointIntersectorLineMarginal
          --input "${CMAKE_SOURCE_DIR}/data/ugridex.vtk"
          --p0 "1, 0.5, 0" --p1 "1, 0.5, 6"
          )
+set_tests_properties(testPointIntersectorLineMarginal
+                     PROPERTIES 
+                     PASS_REGULAR_EXPRESSION "has [^013456789] points")
 
 add_test(NAME testPointIntersectorLineInside
          COMMAND "${PYTHON_EXECUTABLE}" 
@@ -154,6 +163,9 @@ add_test(NAME testPointIntersectorLineInside
          --input "${CMAKE_SOURCE_DIR}/data/ugridex.vtk"
          --p0 "1, 0.5, 0.001" --p1 "1, 0.5, 5.999"
          )
+set_tests_properties(testPointIntersectorLineInside
+                     PROPERTIES 
+                     PASS_REGULAR_EXPRESSION "has [^013456789] points")
 
 add_test(NAME testPointIntersectorTriangleSimple
          COMMAND "${PYTHON_EXECUTABLE}" 
