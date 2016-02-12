@@ -7,6 +7,7 @@ project(egface)
 find_package(PythonInterp REQUIRED)
 # need VTK include files and libraries
 find_package(VTK REQUIRED)
+find_package(LAPACK)
 
 # make sure the numpy python module can be imported
 execute_process(COMMAND "${PYTHON_EXECUTABLE}" -c "import numpy" ERROR_VARIABLE ERROR_NUMPY)
@@ -18,12 +19,19 @@ include(${VTK_USE_FILE})
 add_library(egface SHARED
             egfGrid.cpp
             egfCellLocator.cpp
-            egfPointIntersector.cpp)
+            egfPointIntersector.cpp
+            Factorial.cpp
+            Simplex.cpp
+            SimplexIter.cpp
+            NodalBasis.cpp
+            EdgeBasis.cpp
+            FaceBasis.cpp
+            )
 
 if(VTK_LIBRARIES)
-  target_link_libraries(egface ${VTK_LIBRARIES})
+  target_link_libraries(egface ${VTK_LIBRARIES} ${LAPACK_LIBRARIES})
 else()
-  target_link_libraries(egface vtkHybrid)
+  target_link_libraries(egface vtkHybrid ${LAPACK_LIBRARIES})
 endif()
 
 add_subdirectory(tests)
