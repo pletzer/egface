@@ -8,7 +8,7 @@
 #include <limits>
 #include <vector>
 #include <string> // for size_t
-#include <Simplex.hpp>
+#include "Simplex.hpp"
 
 #ifndef SIMPLEX_INTERSECT_HPP
 #define SIMPLEX_INTERSECT_HPP

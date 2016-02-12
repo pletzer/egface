@@ -23,6 +23,7 @@ add_library(egface SHARED
             Factorial.cpp
             Simplex.cpp
             SimplexIter.cpp
+            SimplexIntersect.cpp
             NodalBasis.cpp
             EdgeBasis.cpp
             FaceBasis.cpp
