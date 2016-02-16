@@ -72,7 +72,7 @@ int egfField_del(egfFieldType** self);
   * @param inds array of size order + 1 for local cell point indices (output)
   * @return 0 upon success
   */
- int egfField_setElement(egfFieldType** self, int elem, int inds[]);
+ int egfField_getElement(egfFieldType** self, int elem, int inds[]);
     
   /**
    * Set the field values for a given cell element

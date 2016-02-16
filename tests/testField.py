@@ -23,37 +23,49 @@ libName = 'libegface'
 # Open the shared library
 lib = cdll.LoadLibrary(args.build_dir + '/' + libName + '.' + suffix)
 
-print >> sys.stderr, '1'
-# Opaque handle
-field = c_void_p(0)
-
-print >> sys.stderr, '2'
-# Constructor
-ier = lib.egfField_new(byref(field))
-assert ier == 0
-
-print >> sys.stderr, '3'
-# Set the staggering
-ier = lib.egfField_setOrder(byref(field), args.order)
-
-print >> sys.stderr, '4'
 # Load the grid from file
 grid = c_void_p(0)
 ier = lib.egfGrid_new(byref(grid))
 ier = lib.egfGrid_loadFromFile(byref(grid), args.input)
+numCells = c_int()
+ier = lib.egfGrid_getNumberOfCells(byref(grid), byref(numCells))
+assert ier == 0
+print 'number of grid cells: ', numCells.value
+
+# Opaque handle
+field = c_void_p(0)
+
+# Constructor
+ier = lib.egfField_new(byref(field))
 assert ier == 0
 
-print >> sys.stderr, '5'
 # Set the grid
 ier = lib.egfField_setGrid(byref(field), grid)
-
-print >> sys.stderr, '6'
-ier = lib.egfGrid_del(byref(grid))
 assert ier == 0
 
-print >> sys.stderr, '7'
-# Destructor
+# Set the staggering
+ier = lib.egfField_setOrder(byref(field), args.order)
+assert ier == 0
+
+# Get the number of elements per cell
+numElems = c_int()
+ier = lib.egfField_getNumberOfElements(byref(field), byref(numElems))
+assert ier == 0
+print 'number of elements per cell: ', numElems.value
+
+np1 = args.order + 1
+for i in range(numElems.value):
+	inds = (c_int * np1)()
+	ier = lib.egfField_getElement(byref(field), i, inds)
+	assert ier == 0
+	print 'element i = ', i, ' inds = ', inds[:]
+
+
+# Destroy field
 ier = lib.egfField_del(byref(field))
 assert ier == 0
 
-print >> sys.stderr, '8'
+# Destroy grid
+ier = lib.egfGrid_del(byref(grid))
+assert ier == 0
+

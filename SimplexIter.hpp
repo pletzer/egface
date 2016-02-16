@@ -59,7 +59,7 @@ public:
 
     size_t getNumberOfElements() const {
         // binomial coefficient
-        return factorial(mnpdims)/(factorial(morder)*factorial(mnpdims-morder));
+        return factorial(mnpdims + 1)/(factorial(morder + 1)*factorial(mnpdims - morder));
     }
 
 
