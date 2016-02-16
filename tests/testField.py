@@ -60,6 +60,9 @@ for i in range(numElems.value):
 	assert ier == 0
 	print 'element i = ', i, ' inds = ', inds[:]
 
+# Check print
+ier = lib.egfField_print(byref(field))
+assert ier == 0
 
 # Destroy field
 ier = lib.egfField_del(byref(field))
