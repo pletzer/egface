@@ -47,7 +47,7 @@ target_link_libraries(testSimplexIter
 
 message(STATUS "VTK_DIR=${VTK_DIR}")
 #
-# class tests
+# Tests
 #
 add_test(NAME testGrid
          COMMAND "${PYTHON_EXECUTABLE}" 
@@ -56,6 +56,16 @@ add_test(NAME testGrid
          --input "${CMAKE_SOURCE_DIR}/data/ugrid2d.vtk"
          --output "testGrid.vtk")
 set_tests_properties(testGrid 
+   PROPERTIES 
+   ENVIRONMENT "${LD_LIBRARY_PATH_NAME}=${VTK_DIR}/../../")
+
+add_test(NAME testFieldEdge
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testField.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
+         --order "1")
+set_tests_properties(testFieldEdge 
    PROPERTIES 
    ENVIRONMENT "${LD_LIBRARY_PATH_NAME}=${VTK_DIR}/../../")
 
