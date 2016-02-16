@@ -16,7 +16,9 @@ int egfField_new(egfFieldType** self) {
 
 int egfField_del(egfFieldType** self) {
     for (size_t i = 0; i < (*self)->dataArrays.size(); ++i) {
-        (*self)->dataArrays[i]->Delete();
+        if ((*self)->dataArrays[i]) {
+            (*self)->dataArrays[i]->Delete();
+        }
     }
     delete *self;
     return 0;
@@ -63,8 +65,7 @@ int egfField_setOrder(egfFieldType** self, int order) {
         (*self)->elems.insert(std::pair<int, std::vector<size_t> >(i, es));
         (*self)->smplxIt.next();
     }
-    (*self)->ugrid->GetFieldData()->AllocateArrays(numElems);
-    (*self)->dataArrays.resize(numElems);
+    (*self)->dataArrays.resize(numElems, NULL);
 
     return 0;
 }
