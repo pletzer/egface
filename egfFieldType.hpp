@@ -6,10 +6,20 @@
 #define EGF_FIELD
 
 
-#include "egfFieldType.hpp"
+#include "egfGridType.hpp"
+#include "SimplexIter.hpp"
+#include <vtkDoubleArray.h>
+#include <vector>
+#include <map>
+#include <string>
 
 struct egfFieldType {
-    vtkUnstructuredField* ugrid;
+    vtkUnstructuredGrid* ugrid;
+    std::vector<vtkDoubleArray*> dataArrays;
+    std::map<int, std::vector<size_t> > elems;
+    SimplexIter smplxIt;
+    std::string type;
+    int order;
 };
 
 extern "C" {
@@ -43,6 +53,13 @@ int egfField_del(egfFieldType** self);
  int egfField_setOrder(egfFieldType** self, int order);
     
  /**
+  * Set grid
+  * @param grid grid
+  * @return 0 upon success
+  */
+ int egfField_setGrid(egfFieldType** self, egfGridType* grid);
+    
+ /**
   * Get number of elements (nodes, edges, faces) in a cell
   * @param numElems number of elements (output)
   * @return 0 upon success
@@ -50,12 +67,12 @@ int egfField_del(egfFieldType** self);
  int egfField_getNumberOfElements(egfFieldType** self, int* numElems);
     
  /**
-  * Set element
+  * Get element
   * @param elem cell element index in the range 0...numElems - 1
-  * @param inds array of size order + 1 for local cell point indices
+  * @param inds array of size order + 1 for local cell point indices (output)
   * @return 0 upon success
   */
- int egfField_setElement(egfFieldType** self, int elem, const int inds[]);
+ int egfField_setElement(egfFieldType** self, int elem, int inds[]);
     
   /**
    * Set the field values for a given cell element

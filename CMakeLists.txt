@@ -21,6 +21,7 @@ add_library(egface SHARED
             egfGrid.cpp
             egfCellLocator.cpp
             egfPointIntersector.cpp
+            egfField.cpp
             Factorial.cpp
             Simplex.cpp
             SimplexIter.cpp
