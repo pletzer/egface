@@ -49,9 +49,8 @@ print 'numCells = ', numCells.value
 
 # Get the connectivity
 for order in range(0, 4):
-	print >> sys.stderr, 'order = ', order
-	numElems = c_int()
-	ier = lib.egfGrid_getNumberOfElements(byref(handle), byref(numElems))
+	numElems = c_int(-1)
+	ier = lib.egfGrid_getNumberOfElements(byref(handle), order, byref(numElems))
 	assert ier == 0
 	print >> sys.stderr, 'order = ', order, ' numElems = ', numElems.value
 	ptConnect = numpy.zeros((numCells.value, numElems.value, order + 1), numpy.int32)
