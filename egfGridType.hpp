@@ -76,6 +76,25 @@ int egfGrid_saveToFile(egfGridType** self, const char* filename);
  */
  int egfGrid_getDomainBounds(egfGridType** self, double* posMin, double* posMax);
 
+/**
+ * Get the number of cell elements of type "order"
+ * @param self handle
+ * @param order 0=nodal, 1=edge, 2=face, 3=cell
+ * @param numElems number of points, edges, faces, etc (output)
+ * @return 0 upon success
+ */
+ int egfGrid_getNumberOfElements(egfGridType** self, int order, int* numElems);
+
+/**
+ * Get the point connectivity of points, edges, faces, cells for each cell
+ * @param self handle
+ * @param order 0=nodal, 1=edge, 2=face, 3=cell
+ * @param ptConnect array of size numCells * numElems * (order + 1) (output)
+ * @return 0 upon success
+ * @note caller owns ptConnect
+ */
+ int egfGrid_getElementConnectivity(egfGridType** self, int order, int ptConnect[]);
+
 }
 
 #endif // EGF_GRID

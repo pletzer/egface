@@ -57,7 +57,8 @@ add_test(NAME testGrid
          --output "testGrid.vtk")
 set_tests_properties(testGrid 
    PROPERTIES 
-   ENVIRONMENT "${LD_LIBRARY_PATH_NAME}=${VTK_DIR}/../../")
+   ENVIRONMENT "${LD_LIBRARY_PATH_NAME}=${VTK_DIR}/../../"
+   TIMEOUT 5)
 
 add_test(NAME testFieldEdge
          COMMAND "${PYTHON_EXECUTABLE}" 

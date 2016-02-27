@@ -13,6 +13,8 @@ find_package(LAPACK REQUIRED)
 # make sure the numpy python module can be imported
 execute_process(COMMAND "${PYTHON_EXECUTABLE}" -c "import numpy" ERROR_VARIABLE ERROR_NUMPY)
 if (NOT ERROR_NUMPY STREQUAL "")
+  message(STATUS "python executable: ${PYTHON_EXECUTABLE}")
+  message(STATUS "${ERROR_NUMPY}")
   message(FATAL_ERROR "You must have python-numpy installed!")
 endif()
 

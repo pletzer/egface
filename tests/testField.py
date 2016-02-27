@@ -11,6 +11,9 @@ parser.add_argument('--input', dest='input', default='',
                     help='Specify input grid file')
 parser.add_argument('--order', dest='order', default=0, type=int,
 	                help='Specify order (0=nodal, 1=edge, 2=face, 3=cell)')
+parser.add_argument('--point_field_expression', dest='point_field_expression', 
+	default='1/sqrt((x-0.5)**2 + (y-0.5)**2 + (z-0.5)**2)',
+	help='Specify the nodal field as an expression of x, y, and z')
 args = parser.parse_args()
 
 suffix = 'so'
@@ -63,6 +66,10 @@ for i in range(numElems.value):
 # Check print
 ier = lib.egfField_print(byref(field))
 assert ier == 0
+
+# Set the form
+
+
 
 # Destroy field
 ier = lib.egfField_del(byref(field))

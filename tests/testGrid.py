@@ -1,5 +1,7 @@
 import argparse
 import os
+import sys
+import numpy
 from ctypes import cdll, POINTER, byref, c_void_p, c_double, c_long, c_int
 
 parser = argparse.ArgumentParser(description='Test grid.')
@@ -44,6 +46,18 @@ numCells = c_int()
 ier = lib.egfGrid_getNumberOfCells(byref(handle), byref(numCells))
 assert ier == 0
 print 'numCells = ', numCells.value
+
+# Get the connectivity
+for order in range(0, 4):
+	print >> sys.stderr, 'order = ', order
+	numElems = c_int()
+	ier = lib.egfGrid_getNumberOfElements(byref(handle), byref(numElems))
+	assert ier == 0
+	print >> sys.stderr, 'order = ', order, ' numElems = ', numElems.value
+	ptConnect = numpy.zeros((numCells.value, numElems.value, order + 1), numpy.int32)
+	ier = lib.egfGrid_getElementConnectivity(byref(handle), order, 
+		ptConnect.ctypes.data_as(POINTER(c_double)))
+	assert ier == 0
 
 # Print
 ier = lib.egfGrid_print(byref(handle));

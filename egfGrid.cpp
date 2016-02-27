@@ -1,4 +1,5 @@
 #include "egfGridType.hpp"
+#include "SimplexIter.hpp"
 #include <vtkUnstructuredGridReader.h>
 #include <vtkUnstructuredGridWriter.h>
 #include <vtkSmartPointer.h>
@@ -84,5 +85,41 @@ int egfGrid_saveToFile(egfGridType** self, const char* filename) {
     posMax[2] = bbox[5];
     return 0;
  }
+
+ int egfGrid_getNumberOfElements(egfGridType** self, int order, int* numElems) {
+ 	SimplexIter smplxIt(3, order);
+ 	*numElems = smplxIt.getNumberOfElements();
+ 	return 0;
+ }
+
+ int egfGrid_getElementConnectivity(egfGridType** self, int order, int ptConnect[]) {
+ 	int res = 0;
+ 	SimplexIter smplxIt(3, order);
+ 	size_t numElems = smplxIt.getNumberOfElements();
+	vtkIdType* ptIds;
+	vtkIdType npts;
+ 	vtkIdType numCells = (*self)->ugrid->GetNumberOfCells();
+ 	for (vtkIdType i = 0; i < numCells; ++i) {
+ 		(*self)->ugrid->GetCellPoints(i, npts, ptIds);
+ 		if (npts == 4) {
+ 			// Iterate over the cell elements
+ 			smplxIt.begin();
+ 			for (size_t j = 0; j < numElems; ++j) {
+ 				const std::vector<size_t>& inds = smplxIt();
+ 				for (int k = 0; k < order + 1; ++k) {
+ 					size_t index = (order + 1)*(i*numElems + j) + k;
+ 					ptConnect[index] = ptIds[inds[k]];
+ 				}
+ 				smplxIt.next();
+ 			}
+ 		}
+ 		else {
+ 			std::cerr << "ERROR: cell is not a tetrahedron!\n";
+ 			res = 1;
+ 		}
+ 	}
+ 	return res;
+ }
+
 
 } // extern "C"
