@@ -60,6 +60,16 @@ set_tests_properties(testUnstructuredGrid3d
    ENVIRONMENT "${LD_LIBRARY_PATH_NAME}=${VTK_DIR}/../../"
    TIMEOUT 5)
 
+add_test(NAME testFieldNodal
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testUnstructuredField3d.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
+         --order "0")
+set_tests_properties(testFieldNodal
+   PROPERTIES 
+   ENVIRONMENT "${LD_LIBRARY_PATH_NAME}=${VTK_DIR}/../../")
+
 add_test(NAME testFieldEdge
          COMMAND "${PYTHON_EXECUTABLE}" 
          "${CMAKE_SOURCE_DIR}/tests/testUnstructuredField3d.py"
@@ -67,6 +77,26 @@ add_test(NAME testFieldEdge
          --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
          --order "1")
 set_tests_properties(testFieldEdge 
+   PROPERTIES 
+   ENVIRONMENT "${LD_LIBRARY_PATH_NAME}=${VTK_DIR}/../../")
+
+add_test(NAME testFieldFace
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testUnstructuredField3d.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
+         --order "2")
+set_tests_properties(testFieldFace 
+   PROPERTIES 
+   ENVIRONMENT "${LD_LIBRARY_PATH_NAME}=${VTK_DIR}/../../")
+
+add_test(NAME testFieldCell
+         COMMAND "${PYTHON_EXECUTABLE}" 
+         "${CMAKE_SOURCE_DIR}/tests/testUnstructuredField3d.py"
+         --build_dir ${CMAKE_BINARY_DIR}
+         --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
+         --order "3")
+set_tests_properties(testFieldCell
    PROPERTIES 
    ENVIRONMENT "${LD_LIBRARY_PATH_NAME}=${VTK_DIR}/../../")
 
