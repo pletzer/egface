@@ -62,7 +62,7 @@ set_tests_properties(testUnstructuredGrid3d
 
 add_test(NAME testFieldEdge
          COMMAND "${PYTHON_EXECUTABLE}" 
-         "${CMAKE_SOURCE_DIR}/tests/testField.py"
+         "${CMAKE_SOURCE_DIR}/tests/testUnstructuredField3d.py"
          --build_dir ${CMAKE_BINARY_DIR}
          --input "${CMAKE_SOURCE_DIR}/data/cube.vtk"
          --order "1")

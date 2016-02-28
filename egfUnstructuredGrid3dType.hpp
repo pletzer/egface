@@ -88,7 +88,7 @@ int egfUnstructuredGrid3d_saveToFile(egfUnstructuredGrid3dType** self, const cha
  	                                           int order, int* numElems);
 
 /**
- * Get the point connectivity of points, edges, faces, cells for each cell
+ * Get the connectivity of points, edges, faces, cells for each cell
  * @param self handle
  * @param order 0=nodal, 1=edge, 2=face, 3=cell
  * @param ptConnect array of size numCells * numElems * (order + 1) (output)
