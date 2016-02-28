@@ -28,10 +28,10 @@ lib = cdll.LoadLibrary(args.build_dir + '/' + libName + '.' + suffix)
 
 # Load the grid from file
 grid = c_void_p(0)
-ier = lib.egfGrid_new(byref(grid))
-ier = lib.egfGrid_loadFromFile(byref(grid), args.input)
+ier = lib.egfUnstructuredGrid3d_new(byref(grid))
+ier = lib.egfUnstructuredGrid3d_loadFromFile(byref(grid), args.input)
 numCells = c_int()
-ier = lib.egfGrid_getNumberOfCells(byref(grid), byref(numCells))
+ier = lib.egfUnstructuredGrid3d_getNumberOfCells(byref(grid), byref(numCells))
 assert ier == 0
 print 'number of grid cells: ', numCells.value
 
@@ -76,6 +76,6 @@ ier = lib.egfField_del(byref(field))
 assert ier == 0
 
 # Destroy grid
-ier = lib.egfGrid_del(byref(grid))
+ier = lib.egfUnstructuredGrid3d_del(byref(grid))
 assert ier == 0
 

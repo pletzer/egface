@@ -70,7 +70,7 @@ int egfField_setOrder(egfFieldType** self, int order) {
     return 0;
 }
 
-int egfField_setGrid(egfFieldType** self, egfGridType* grid) {
+int egfField_setGrid(egfFieldType** self, egfUnstructuredGrid3dType* grid) {
     (*self)->ugrid = grid->ugrid;
     return 0;
 }

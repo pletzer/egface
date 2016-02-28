@@ -20,7 +20,7 @@ endif()
 
 include(${VTK_USE_FILE})
 add_library(egface SHARED
-            egfGrid.cpp
+            egfUnstructuredGrid3d.cpp
             egfCellLocator.cpp
             egfPointIntersector.cpp
             egfField.cpp

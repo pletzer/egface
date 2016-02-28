@@ -16,10 +16,10 @@ int main(int argc, char**argv) {
     char* filename = argv[1];
 
     // Load a grid from file
-    egfGridType* grid = NULL;
+    egfUnstructuredGrid3dType* grid = NULL;
     int ier;
-    ier = egfGrid_new(&grid);
-    ier = egfGrid_loadFromFile(&grid, filename);
+    ier = egfUnstructuredGrid3d_new(&grid);
+    ier = egfUnstructuredGrid3d_loadFromFile(&grid, filename);
 
     egfPointIntersectorType* intrsctr = NULL;
 
@@ -48,7 +48,7 @@ int main(int argc, char**argv) {
     ier = egfPointIntersector_del(&intrsctr);
 
     // Delete grid
-    ier = egfGrid_del(&grid);
+    ier = egfUnstructuredGrid3d_del(&grid);
     
     return 0;
 }

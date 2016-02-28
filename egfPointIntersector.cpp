@@ -46,7 +46,8 @@ int egfPointIntersector_print(egfPointIntersectorType** self) {
     return 0;
 }
 
-int egfPointIntersector_setGrid(egfPointIntersectorType** self, egfGridType* grid) {
+int egfPointIntersector_setGrid(egfPointIntersectorType** self,
+                                egfUnstructuredGrid3dType* grid) {
     (*self)->ugrid = grid->ugrid;
     (*self)->cellLocator->SetDataSet(grid->ugrid);
     (*self)->cellLocator->BuildLocator();

@@ -22,8 +22,8 @@ lib = cdll.LoadLibrary(args.build_dir + '/' + libName + '.' + suffix)
 
 # Load a grid from file
 grid = c_void_p(0)
-ier = lib.egfGrid_new(byref(grid))
-ier = lib.egfGrid_loadFromFile(byref(grid), args.input)
+ier = lib.egfUnstructuredGrid3d_new(byref(grid))
+ier = lib.egfUnstructuredGrid3d_loadFromFile(byref(grid), args.input)
 
 # Opaque handle
 locator = c_void_p(0)
@@ -43,7 +43,7 @@ assert ier == 0
 # Find the cell within a box
 domMin = (3*c_double)(0, 0, 0)
 domMax = (3*c_double)(0, 0, 0)
-ier = lib.egfGrid_getDomainBounds(byref(grid), domMin, domMax)
+ier = lib.egfUnstructuredGrid3d_getDomainBounds(byref(grid), domMin, domMax)
 posMin = (3*c_double)(0, 0, 0)
 posMax = (3*c_double)(0, 0, 0)
 for i in range(3):
@@ -72,4 +72,4 @@ ier = lib.egfCellLocator_del(byref(locator))
 assert ier == 0
 
 # Delete grid
-ier = lib.egfGrid_del(byref(grid))
+ier = lib.egfUnstructuredGrid3d_del(byref(grid))

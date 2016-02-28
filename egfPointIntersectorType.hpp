@@ -5,7 +5,7 @@
 #ifndef EGF_POINT_INTERSECTOR
 #define EGF_POINT_INTERSECTOR
 
-#include "egfGridType.hpp"
+#include "egfUnstructuredGrid3dType.hpp"
 #include <vtkCellLocator.h>
 #include <vector>
 #include <map>
@@ -95,7 +95,8 @@ int egfPointIntersector_del(egfPointIntersectorType** self);
  * @param grid unstructured grid instance
  * @return 0 upon success
  */
-int egfPointIntersector_setGrid(egfPointIntersectorType** self, egfGridType* grid);
+int egfPointIntersector_setGrid(egfPointIntersectorType** self, 
+                                egfUnstructuredGrid3dType* grid);
 
 /**
  * Set tolerance

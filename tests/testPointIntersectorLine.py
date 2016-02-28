@@ -30,8 +30,8 @@ lib = cdll.LoadLibrary(args.build_dir + '/' + libName + '.' + suffix)
 
 # Load a grid from file
 grid = c_void_p(0)
-ier = lib.egfGrid_new(byref(grid))
-ier = lib.egfGrid_loadFromFile(byref(grid), args.input)
+ier = lib.egfUnstructuredGrid3d_new(byref(grid))
+ier = lib.egfUnstructuredGrid3d_loadFromFile(byref(grid), args.input)
 
 # Opaque handle
 intrsctr = c_void_p(0)
@@ -92,4 +92,4 @@ ier = lib.egfPointIntersector_del(byref(intrsctr))
 assert ier == 0
 
 # Delete grid
-ier = lib.egfGrid_del(byref(grid))
+ier = lib.egfUnstructuredGrid3d_del(byref(grid))

@@ -43,7 +43,8 @@ int egfCellLocator_del(egfCellLocatorType** self);
  * @param grid unstructured grid instance
  * @return 0 upon success
  */
-int egfCellLocator_setGrid(egfCellLocatorType** self, egfGridType* grid);
+int egfCellLocator_setGrid(egfCellLocatorType** self,
+	                       egfUnstructuredGrid3dType* grid);
 
 /**
  * Set the number of cells per bucket used to accelerate the search for cells

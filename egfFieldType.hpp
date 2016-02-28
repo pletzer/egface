@@ -6,7 +6,7 @@
 #define EGF_FIELD
 
 
-#include "egfGridType.hpp"
+#include "egfUnstructuredGrid3dType.hpp"
 #include "SimplexIter.hpp"
 #include <vtkDoubleArray.h>
 #include <vector>
@@ -57,7 +57,7 @@ int egfField_del(egfFieldType** self);
   * @param grid grid
   * @return 0 upon success
   */
- int egfField_setGrid(egfFieldType** self, egfGridType* grid);
+ int egfField_setGrid(egfFieldType** self, egfUnstructuredGrid3dType* grid);
     
  /**
   * Get number of elements (nodes, edges, faces) in a cell

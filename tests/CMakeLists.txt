@@ -49,13 +49,13 @@ message(STATUS "VTK_DIR=${VTK_DIR}")
 #
 # Tests
 #
-add_test(NAME testGrid
+add_test(NAME testUnstructuredGrid3d
          COMMAND "${PYTHON_EXECUTABLE}" 
-         "${CMAKE_SOURCE_DIR}/tests/testGrid.py"
+         "${CMAKE_SOURCE_DIR}/tests/testUnstructuredGrid3d.py"
          --build_dir ${CMAKE_BINARY_DIR}
          --input "${CMAKE_SOURCE_DIR}/data/ugrid2d.vtk"
          --output "testGrid.vtk")
-set_tests_properties(testGrid 
+set_tests_properties(testUnstructuredGrid3d 
    PROPERTIES 
    ENVIRONMENT "${LD_LIBRARY_PATH_NAME}=${VTK_DIR}/../../"
    TIMEOUT 5)

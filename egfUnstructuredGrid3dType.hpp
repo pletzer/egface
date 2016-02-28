@@ -2,13 +2,13 @@
  * Grid object
  */
 
-#ifndef EGF_GRID
-#define EGF_GRID
+#ifndef EGF_UNSTRUCTURED_GRID_3D
+#define EGF_UNSTRUCTURED_GRID_3D
 
 
 #include <vtkUnstructuredGrid.h>
 
-struct egfGridType {
+struct egfUnstructuredGrid3dType {
     vtkUnstructuredGrid* ugrid;
 };
 
@@ -19,21 +19,21 @@ extern "C" {
  * @param self handle
  * @return 0 upon success
  */
-int egfGrid_new(egfGridType** self);
+int egfUnstructuredGrid3d_new(egfUnstructuredGrid3dType** self);
 
 /**
  * Destructor
  * @param self handle
  * @return 0 upon success
  */
-int egfGrid_del(egfGridType** self);
+int egfUnstructuredGrid3d_del(egfUnstructuredGrid3dType** self);
 
 /**
  * Print 
  * @param self handle
  * @return 0 upon success
  */
- int egfGrid_print(egfGridType** self);
+ int egfUnstructuredGrid3d_print(egfUnstructuredGrid3dType** self);
 
 /**
  * Load from file
@@ -41,7 +41,7 @@ int egfGrid_del(egfGridType** self);
  * @param filename file name
  * @return 0 upon success
  */
-int egfGrid_loadFromFile(egfGridType** self, const char* filename);
+int egfUnstructuredGrid3d_loadFromFile(egfUnstructuredGrid3dType** self, const char* filename);
 
 /**
  * Save to file
@@ -49,7 +49,7 @@ int egfGrid_loadFromFile(egfGridType** self, const char* filename);
  * @param filename file name
  * @return 0 upon success
  */
-int egfGrid_saveToFile(egfGridType** self, const char* filename);
+int egfUnstructuredGrid3d_saveToFile(egfUnstructuredGrid3dType** self, const char* filename);
 
 /**
  * Get number of cells
@@ -57,7 +57,7 @@ int egfGrid_saveToFile(egfGridType** self, const char* filename);
  * @param numCells (output)
  * @return 0 upon success
  */
- int egfGrid_getNumberOfCells(egfGridType** self, int* numCells);
+ int egfUnstructuredGrid3d_getNumberOfCells(egfUnstructuredGrid3dType** self, int* numCells);
 
 /**
  * Get number of cells
@@ -65,7 +65,7 @@ int egfGrid_saveToFile(egfGridType** self, const char* filename);
  * @param numPoints (output)
  * @return 0 upon success
  */
- int egfGrid_getNumberOfPoints(egfGridType** self, int* numPoints);
+ int egfUnstructuredGrid3d_getNumberOfPoints(egfUnstructuredGrid3dType** self, int* numPoints);
 
 /**
  * Get the domain bounds
@@ -74,7 +74,8 @@ int egfGrid_saveToFile(egfGridType** self, const char* filename);
  * @param posMin upper box point (output)
  * @return 0 upon success
  */
- int egfGrid_getDomainBounds(egfGridType** self, double* posMin, double* posMax);
+ int egfUnstructuredGrid3d_getDomainBounds(egfUnstructuredGrid3dType** self,
+ 	                                       double* posMin, double* posMax);
 
 /**
  * Get the number of cell elements of type "order"
@@ -83,7 +84,8 @@ int egfGrid_saveToFile(egfGridType** self, const char* filename);
  * @param numElems number of points, edges, faces, etc (output)
  * @return 0 upon success
  */
- int egfGrid_getNumberOfElements(egfGridType** self, int order, int* numElems);
+ int egfUnstructuredGrid3d_getNumberOfElements(egfUnstructuredGrid3dType** self,
+ 	                                           int order, int* numElems);
 
 /**
  * Get the point connectivity of points, edges, faces, cells for each cell
@@ -93,8 +95,9 @@ int egfGrid_saveToFile(egfGridType** self, const char* filename);
  * @return 0 upon success
  * @note caller owns ptConnect
  */
- int egfGrid_getElementConnectivity(egfGridType** self, int order, int ptConnect[]);
+ int egfUnstructuredGrid3d_getElementConnectivity(egfUnstructuredGrid3dType** self,
+ 	                                              int order, int ptConnect[]);
 
 }
 
-#endif // EGF_GRID
+#endif // EGF_UNSTRUCTURED_GRID_3D

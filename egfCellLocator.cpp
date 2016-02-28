@@ -1,4 +1,4 @@
-#include "egfGridType.hpp"
+#include "egfUnstructuredGrid3dType.hpp"
 #include "egfCellLocatorType.hpp"
 #include <vtkUnstructuredGrid.h>
 #include <vtkSmartPointer.h>
@@ -30,7 +30,8 @@ int egfCellLocator_print(egfCellLocatorType** self) {
     return 0;
 }
 
-int egfCellLocator_setGrid(egfCellLocatorType** self, egfGridType* grid) {
+int egfCellLocator_setGrid(egfCellLocatorType** self,
+                           egfUnstructuredGrid3dType* grid) {
     (*self)->cellLocator->SetDataSet(grid->ugrid);
     return 0;
 }

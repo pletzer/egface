@@ -1,4 +1,4 @@
-#include "egfGridType.hpp"
+#include "egfUnstructuredGrid3dType.hpp"
 #include "SimplexIter.hpp"
 #include <vtkUnstructuredGridReader.h>
 #include <vtkUnstructuredGridWriter.h>
@@ -8,20 +8,20 @@
 
 extern "C" {
 
-int egfGrid_new(egfGridType** self) {
-	(*self) = new egfGridType();
+int egfUnstructuredGrid3d_new(egfUnstructuredGrid3dType** self) {
+	(*self) = new egfUnstructuredGrid3dType();
 	(*self)->ugrid = vtkUnstructuredGrid::New();
 	return 0;
 }
 
-int egfGrid_del(egfGridType** self) {
+int egfUnstructuredGrid3d_del(egfUnstructuredGrid3dType** self) {
 	(*self)->ugrid->Delete();
 	delete *self;
     return 0;
 }
 
-int egfGrid_print(egfGridType** self) {
-	std::cout << "egfGrid:\n";
+int egfUnstructuredGrid3d_print(egfUnstructuredGrid3dType** self) {
+	std::cout << "egfUnstructuredGrid3d:\n";
 	vtkIdType numPoints = (*self)->ugrid->GetNumberOfPoints();
 	double point[] = {0, 0, 0};
 	for (vtkIdType i = 0; i < numPoints; ++i) {
@@ -44,7 +44,7 @@ int egfGrid_print(egfGridType** self) {
     return 0;
 }
 
-int egfGrid_loadFromFile(egfGridType** self, const char* filename) {
+int egfUnstructuredGrid3d_loadFromFile(egfUnstructuredGrid3dType** self, const char* filename) {
     vtkSmartPointer<vtkUnstructuredGridReader> reader = vtkSmartPointer<vtkUnstructuredGridReader>::New();
     reader->SetFileName(filename);
     reader->Update();
@@ -52,7 +52,7 @@ int egfGrid_loadFromFile(egfGridType** self, const char* filename) {
 	return 0;
 }
 
-int egfGrid_saveToFile(egfGridType** self, const char* filename) {
+int egfUnstructuredGrid3d_saveToFile(egfUnstructuredGrid3dType** self, const char* filename) {
     vtkSmartPointer<vtkUnstructuredGridWriter> writer = vtkSmartPointer<vtkUnstructuredGridWriter>::New();
     writer->SetFileName(filename);
 #if (VTK_MAJOR_VERSION < 6)
@@ -64,17 +64,17 @@ int egfGrid_saveToFile(egfGridType** self, const char* filename) {
 	return 0;
 }
 
- int egfGrid_getNumberOfCells(egfGridType** self, int* numCells) {
+ int egfUnstructuredGrid3d_getNumberOfCells(egfUnstructuredGrid3dType** self, int* numCells) {
  	*numCells = (int) (*self)->ugrid->GetNumberOfCells();
  	return 0;
  }
 
- int egfGrid_getNumberOfPoints(egfGridType** self, int* numPoints) {
+ int egfUnstructuredGrid3d_getNumberOfPoints(egfUnstructuredGrid3dType** self, int* numPoints) {
  	*numPoints = (int) (*self)->ugrid->GetNumberOfPoints();
  	return 0; 	
  }
 
- int egfGrid_getDomainBounds(egfGridType** self, double* posMin, double* posMax) {
+ int egfUnstructuredGrid3d_getDomainBounds(egfUnstructuredGrid3dType** self, double* posMin, double* posMax) {
     (*self)->ugrid->GetPoints()->ComputeBounds();
     double* bbox = (*self)->ugrid->GetPoints()->GetBounds();
     posMin[0] = bbox[0];
@@ -86,13 +86,13 @@ int egfGrid_saveToFile(egfGridType** self, const char* filename) {
     return 0;
  }
 
- int egfGrid_getNumberOfElements(egfGridType** self, int order, int* numElems) {
+ int egfUnstructuredGrid3d_getNumberOfElements(egfUnstructuredGrid3dType** self, int order, int* numElems) {
  	SimplexIter smplxIt(3, order);
  	*numElems = smplxIt.getNumberOfElements();
  	return 0;
  }
 
- int egfGrid_getElementConnectivity(egfGridType** self, int order, int ptConnect[]) {
+ int egfUnstructuredGrid3d_getElementConnectivity(egfUnstructuredGrid3dType** self, int order, int ptConnect[]) {
  	int res = 0;
  	SimplexIter smplxIt(3, order);
  	size_t numElems = smplxIt.getNumberOfElements();
