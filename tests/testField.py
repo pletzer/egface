@@ -39,32 +39,32 @@ print 'number of grid cells: ', numCells.value
 field = c_void_p(0)
 
 # Constructor
-ier = lib.egfField_new(byref(field))
+ier = lib.egfUnstructuredField3d_new(byref(field))
 assert ier == 0
 
 # Set the grid
-ier = lib.egfField_setGrid(byref(field), grid)
+ier = lib.egfUnstructuredField3d_setGrid(byref(field), grid)
 assert ier == 0
 
 # Set the staggering
-ier = lib.egfField_setOrder(byref(field), args.order)
+ier = lib.egfUnstructuredField3d_setOrder(byref(field), args.order)
 assert ier == 0
 
 # Get the number of elements per cell
 numElems = c_int()
-ier = lib.egfField_getNumberOfElements(byref(field), byref(numElems))
+ier = lib.egfUnstructuredField3d_getNumberOfElements(byref(field), byref(numElems))
 assert ier == 0
 print 'number of elements per cell: ', numElems.value
 
 np1 = args.order + 1
 for i in range(numElems.value):
 	inds = (c_int * np1)()
-	ier = lib.egfField_getElement(byref(field), i, inds)
+	ier = lib.egfUnstructuredField3d_getElement(byref(field), i, inds)
 	assert ier == 0
 	print 'element i = ', i, ' inds = ', inds[:]
 
 # Check print
-ier = lib.egfField_print(byref(field))
+ier = lib.egfUnstructuredField3d_print(byref(field))
 assert ier == 0
 
 # Set the form
@@ -72,7 +72,7 @@ assert ier == 0
 
 
 # Destroy field
-ier = lib.egfField_del(byref(field))
+ier = lib.egfUnstructuredField3d_del(byref(field))
 assert ier == 0
 
 # Destroy grid

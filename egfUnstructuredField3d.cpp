@@ -1,20 +1,20 @@
 
-#include "egfFieldType.hpp"
+#include "egfUnstructuredField3dType.hpp"
 #include <vtkFieldData.h>
 #include <iostream>
 #include <sstream>
 
 extern "C" {
 
-int egfField_new(egfFieldType** self) {
-    *self = new egfFieldType();
+int egfUnstructuredField3d_new(egfUnstructuredField3dType** self) {
+    *self = new egfUnstructuredField3dType();
     (*self)->ugrid = NULL;
     (*self)->order = -1;
     (*self)->type = "UNKNOWN";
     return 0;
 }
 
-int egfField_del(egfFieldType** self) {
+int egfUnstructuredField3d_del(egfUnstructuredField3dType** self) {
     for (size_t i = 0; i < (*self)->dataArrays.size(); ++i) {
         if ((*self)->dataArrays[i]) {
             (*self)->dataArrays[i]->Delete();
@@ -24,8 +24,8 @@ int egfField_del(egfFieldType** self) {
     return 0;
 }
 
-int egfField_print(egfFieldType** self) {
-    std::cout << "egfField\n";
+int egfUnstructuredField3d_print(egfUnstructuredField3dType** self) {
+    std::cout << "egfUnstructuredField3d\n";
     if ((*self)->ugrid && (*self)->order >= 0) {
         size_t numElems = (*self)->elems.size();
         std::cout << "type: " << (*self)->type << " order: " << (*self)->order 
@@ -42,7 +42,7 @@ int egfField_print(egfFieldType** self) {
     return 0;
 }
    
-int egfField_setOrder(egfFieldType** self, int order) {
+int egfUnstructuredField3d_setOrder(egfUnstructuredField3dType** self, int order) {
     (*self)->order = order;
     if ((*self)->order == 0) {
         (*self)->type = "nodal";
@@ -70,24 +70,24 @@ int egfField_setOrder(egfFieldType** self, int order) {
     return 0;
 }
 
-int egfField_setGrid(egfFieldType** self, egfUnstructuredGrid3dType* grid) {
+int egfUnstructuredField3d_setGrid(egfUnstructuredField3dType** self, egfUnstructuredGrid3dType* grid) {
     (*self)->ugrid = grid->ugrid;
     return 0;
 }
     
-int egfField_getNumberOfElements(egfFieldType** self, int* numElems) {
+int egfUnstructuredField3d_getNumberOfElements(egfUnstructuredField3dType** self, int* numElems) {
     *numElems = (int) (*self)->smplxIt.getNumberOfElements();
     return 0;
 }
     
-int egfField_getElement(egfFieldType** self, int elem, int inds[]) {
+int egfUnstructuredField3d_getElement(egfUnstructuredField3dType** self, int elem, int inds[]) {
     for (size_t j = 0; j < (*self)->elems[elem].size(); ++j) {
         inds[j] = (*self)->elems[elem][j];
     }
     return 0;
 }
     
-int egfField_setValues(egfFieldType** self, int elem, const double vals[]) {
+int egfUnstructuredField3d_setValues(egfUnstructuredField3dType** self, int elem, const double vals[]) {
     vtkDoubleArray* data = vtkDoubleArray::New();
     vtkIdType numCells = (*self)->ugrid->GetNumberOfCells();
     size_t numElems = (*self)->smplxIt.getNumberOfElements();

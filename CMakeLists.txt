@@ -23,7 +23,7 @@ add_library(egface SHARED
             egfUnstructuredGrid3d.cpp
             egfCellLocator.cpp
             egfPointIntersector.cpp
-            egfField.cpp
+            egfUnstructuredField3d.cpp
             Factorial.cpp
             Simplex.cpp
             SimplexIter.cpp
