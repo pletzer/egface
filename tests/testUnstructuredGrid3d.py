@@ -47,17 +47,6 @@ ier = lib.egfUnstructuredGrid3d_getNumberOfCells(byref(handle), byref(numCells))
 assert ier == 0
 print 'numCells = ', numCells.value
 
-# Get the connectivity
-for order in range(0, 4):
-	numElems = c_int(-1)
-	ier = lib.egfUnstructuredGrid3d_getNumberOfElements(byref(handle), order, byref(numElems))
-	assert ier == 0
-	print >> sys.stderr, 'order = ', order, ' numElems = ', numElems.value
-	ptConnect = numpy.zeros((numCells.value, numElems.value, order + 1), numpy.int32)
-	ier = lib.egfUnstructuredGrid3d_getElementConnectivity(byref(handle), order, 
-		ptConnect.ctypes.data_as(POINTER(c_double)))
-	assert ier == 0
-
 # Print
 ier = lib.egfUnstructuredGrid3d_print(byref(handle));
 assert ier == 0
