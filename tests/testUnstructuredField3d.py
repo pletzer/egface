@@ -11,9 +11,9 @@ parser.add_argument('--input', dest='input', default='',
                     help='Specify input grid file')
 parser.add_argument('--order', dest='order', default=0, type=int,
 	                help='Specify order (0=nodal, 1=edge, 2=face, 3=cell)')
-parser.add_argument('--point_field_expression', dest='point_field_expression', 
-	default='1/sqrt((x-0.5)**2 + (y-0.5)**2 + (z-0.5)**2)',
-	help='Specify the nodal field as an expression of x, y, and z')
+parser.add_argument('--expression', dest='expression',
+	default='dx ^ dy + 2 * dy ^ dz',
+	help='Specify form as an expression of x, y, and z, eg dx ^ dy + 2 * dy ^ dz for a 2-form')
 args = parser.parse_args()
 
 suffix = 'so'
@@ -57,8 +57,8 @@ assert ier == 0
 print 'number of elements per cell: ', numElems.value
 
 np1 = args.order + 1
+inds = (c_int * np1)()
 for i in range(numElems.value):
-	inds = (c_int * np1)()
 	ier = lib.egfUnstructuredField3d_getElement(byref(field), i, inds)
 	assert ier == 0
 	print 'element i = ', i, ' inds = ', inds[:]
