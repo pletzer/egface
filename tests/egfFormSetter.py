@@ -1,5 +1,6 @@
 import scipy
 import numpy
+import math
 import re
 
 class FormSetter:
@@ -56,8 +57,11 @@ class FormSetter:
         from math import sin, cos, tan, asin, acos, atan, atan2, pi, exp, log, log10, e
         res = 0
         if self.order == 0:
-            for t in self.terms.values():
-                res += eval(t)
+            for k, v in self.terms.items():
+                v = re.sub('x', 'self.baseVert[0]', v)
+                v = re.sub('y', 'self.baseVert[1]', v)
+                v = re.sub('z', 'self.baseVert[2]', v)
+                res += eval(v)
         elif self.order == 1:
             for k, v in self.terms.items():
                 k0, = k
@@ -110,14 +114,14 @@ def test0():
     fs.setExpression('x*y + z')
     fs.setElement([1., 2., 3.])
     res = fs.evaluate()
-    assert fabs(res - (1.*2. + 3.)) < 1.e-10
+    assert math.fabs(res - (1.*2. + 3.)) < 1.e-10
 
 def test1():
     fs = FormSetter(0)
     fs.setExpression('x* dy + z**2 *dz')
     fs.setElement([1., 2., 3.], [1.1, 2.2, 3.3])
     res = fs.evaluate()
-    assert fabs(res - 0.21 - 2.979) < 1.e-10
+    assert math.fabs(res - 0.21 - 2.979) < 1.e-10
 
 
 
