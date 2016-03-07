@@ -1,4 +1,5 @@
 import scipy
+import numpy
 import re
 
 class FormSetter:
@@ -10,7 +11,7 @@ class FormSetter:
         """
         self.order = order
         self.terms = {}
-        self.formPat = re.compile(reduce(lambda x,y: x + '\^' + y, ['d\s*([xyz])\s*']*order))
+        self.formPat = reduce(lambda x,y: x + '\^' + y, ['d\s*([xyz])\s*']*order, '')
         self.dVerts = []
         self.baseVert = None   
 
@@ -19,16 +20,21 @@ class FormSetter:
         Set form expression
         @param expr expression, eg x**2 * dx ^ dz + sin(pi*y)* dy ^ dx
         """
+        if self.formPat == '':
+            self.terms[''] = expr
+            return
+
         coordName2Index = {'x': 0, 'y': 1, 'z': 2}
         # break the expresssion into independent terms
         continueFlag = True
         e = expr[:] # copy
+        print '... e = ', e
         coords = []
         while continueFlag:
             m = re.search(self.formPat, e)
             if m:
-                coords.append([coordName2Index[m.group(1 + o)] for o in self.order])
-                e = re.sub(m.group(0), ',', 1) # replace the first occurrence only
+                coords.append([coordName2Index[m.group(1 + o)] for o in range(self.order)])
+                e = re.sub(m.group(0), ',', e, 1) # replace the first occurrence only
             else:
                 continueFlag = False
         self.terms = zip(coords, e.split(','))
@@ -47,7 +53,7 @@ class FormSetter:
         Integrate the form over the element
         @return value
         """
-        from numpy import sin, cos, tan, asin, acos, atan, atan2, pi, exp, log, log10, e
+        from math import sin, cos, tan, asin, acos, atan, atan2, pi, exp, log, log10, e
         res = 0
         if self.order == 0:
             for t in self.terms.values():
@@ -103,14 +109,14 @@ def test0():
     fs = FormSetter(0)
     fs.setExpression('x*y + z')
     fs.setElement([1., 2., 3.])
-    res = fs.integrate()
+    res = fs.evaluate()
     assert fabs(res - (1.*2. + 3.)) < 1.e-10
 
 def test1():
     fs = FormSetter(0)
     fs.setExpression('x* dy + z**2 *dz')
     fs.setElement([1., 2., 3.], [1.1, 2.2, 3.3])
-    res = fs.integrate()
+    res = fs.evaluate()
     assert fabs(res - 0.21 - 2.979) < 1.e-10
 
 
