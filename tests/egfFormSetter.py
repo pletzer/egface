@@ -2,6 +2,7 @@ import scipy.integrate
 import numpy
 import math
 import re
+from math import sin, cos, tan, asin, acos, atan, atan2, pi, exp, log, log10, e
 
 class FormSetter:
 
@@ -73,12 +74,17 @@ class FormSetter:
         """
         return eval(self.funcXsiEtaStr)
 
+    def funcXsiEtaZet(self, xsi, eta, zet):
+        """
+        3-d integrand
+        """
+        return eval(self.funcXsiEtaZetStr)
+
     def evaluate(self):
         """
         Evaluate (integrate) the form over the element
         @return value
         """
-        from math import sin, cos, tan, asin, acos, atan, atan2, pi, exp, log, log10, e
         res = 0
 
         if self.order == 0:
