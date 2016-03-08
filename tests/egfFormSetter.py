@@ -1,4 +1,4 @@
-import scipy
+import scipy.integrate
 import numpy
 import math
 import re
@@ -10,10 +10,21 @@ class FormSetter:
         Constructor
         @param order order of the form (0, 1, 2, or 3)
         """
+        # order of the form (0 = point, 1 = edge, 2 = face, 3 = cell)
         self.order = order
+
+        # dictionary basis element => function
         self.terms = {}
-        self.formPat = reduce(lambda x,y: x + '\^' + y, ['d\s*([xyz])\s*']*order, '')
+
+        # basis element pattern, eg 'd\s*([xyz])\s*\^d\s*([xyz])\s*'
+        self.formPat = re.sub(r'^\^', '', reduce(lambda x, y: x + '^' + y, ['d\s*([xyz])\s*']*order, ''))
+        if self.formPat != '':
+            self.formPat = '\s*\\*\s*' + self.formPat
+
+        # edge lengths
         self.dVerts = []
+
+        # base vertex
         self.baseVert = None   
 
     def setExpression(self, expr):
@@ -29,16 +40,16 @@ class FormSetter:
         # break the expresssion into independent terms
         continueFlag = True
         e = expr[:] # copy
-        print '... e = ', e
         coords = []
         while continueFlag:
             m = re.search(self.formPat, e)
             if m:
-                coords.append([coordName2Index[m.group(1 + o)] for o in range(self.order)])
-                e = re.sub(m.group(0), ',', e, 1) # replace the first occurrence only
+                coords.append(tuple([coordName2Index[m.group(1 + o)] for o in range(self.order)]))
+                e = re.sub(re.escape(m.group(0)), ',', e, 1) # replace the first occurrence only
+                e = re.sub(r'\,$', '', e)
             else:
                 continueFlag = False
-        self.terms = zip(coords, e.split(','))
+        self.terms = dict(zip(coords, e.split(',')))
 
     def setElement(self, *vertices):
         """
@@ -48,6 +59,9 @@ class FormSetter:
         assert len(vertices) == self.order + 1
         self.dVerts = [numpy.array(v) - numpy.array(vertices[0]) for v in vertices[1:]]
         self.baseVert = numpy.array(vertices[0])
+
+    def funcXsi(self, xsi):
+        return eval(self.funcXsiStr)
 
     def evaluate(self):
         """
@@ -65,13 +79,11 @@ class FormSetter:
         elif self.order == 1:
             for k, v in self.terms.items():
                 k0, = k
-                det = dVerts[0][k[0]]
-                def f(xsi):
-                    v = re.sub('x', '(self.baseVert[0] + xsi*self.dVerts[0][0])', v)
-                    v = re.sub('y', '(self.baseVert[1] + xsi*self.dVerts[0][1])', v)
-                    v = re.sub('z', '(self.baseVert[2] + xsi*self.dVerts[0][2])', v)
-                    return eval(v)
-                res += scipy.integrate.quad(f, 0., 1.)[0] * det
+                det = self.dVerts[0][k[0]]
+                v = re.sub('x', '(self.baseVert[0] + xsi*self.dVerts[0][0])', v)
+                v = re.sub('y', '(self.baseVert[1] + xsi*self.dVerts[0][1])', v)
+                self.funcXsiStr = re.sub('z', '(self.baseVert[2] + xsi*self.dVerts[0][2])', v)
+                res += scipy.integrate.quad(self.funcXsi, 0., 1.)[0] * det
         elif self.order == 2:
             for k, v in self.terms.items():
                 k0, k1 = k
@@ -117,7 +129,7 @@ def test0():
     assert math.fabs(res - (1.*2. + 3.)) < 1.e-10
 
 def test1():
-    fs = FormSetter(0)
+    fs = FormSetter(1)
     fs.setExpression('x* dy + z**2 *dz')
     fs.setElement([1., 2., 3.], [1.1, 2.2, 3.3])
     res = fs.evaluate()
