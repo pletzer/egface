@@ -18,10 +18,18 @@ class FormSetter:
         # {(0, 2): 'x**2'} represents x**2 * dx ^ dz
         self.terms = {}
 
-        # basis element pattern, eg 'd\s*([xyz])\s*\^d\s*([xyz])\s*'
-        self.formPat = re.sub(r'^\^', '', reduce(lambda x, y: x + '^' + y, ['d\s*([xyz])\s*']*order, ''))
-        if self.formPat != '':
-            self.formPat = '\s*\\*\s*' + self.formPat
+        # basis element pattern, eg 'd\s*([xyz])\s*\^\s*d\s*([xyz])\s*'
+        self.formPat = ''
+        dxyzPat = '\s*d\s*([xyz])\s*'
+        wedgePat = '\^'
+        if order >= 1:
+            self.formPat += dxyzPat
+        if order >= 2:
+            self.formPat += wedgePat + dxyzPat
+        if order == 3:
+            self.formPat += wedgePat + dxyzPat
+        if order > 0:
+            self.formPat = '\s*\*' + self.formPat
 
         # edge lengths
         self.dVerts = []
@@ -115,8 +123,6 @@ class FormSetter:
                 v = re.sub('y', '(self.baseVert[1] + xsi*self.dVerts[0][1] + eta*self.dVerts[1][1])', v)
                 v = re.sub('z', '(self.baseVert[2] + xsi*self.dVerts[0][2] + eta*self.dVerts[1][2])', v)
                 self.funcXsiEtaStr = v
-                def f(xsi, eta):
-                    return eval(v)
                 def loEta(xsi):
                     return 0.0
                 def hiEta(xsi):
@@ -162,11 +168,32 @@ def test1():
     res = fs.evaluate()
     assert math.fabs(res - 0.21 - 2.979) < 1.e-10
 
+def test2():
+    fs = FormSetter(2)
+    fs.setExpression('x* dy ^ dz')
+    fs.setElement([1., 2., 3.], [1.1, 2.2, 3.3], [-0.1, 0.2, 0.5])
+    res = fs.evaluate()
+    assert math.fabs(res - 0.0133333333333) < 1.e-8
 
-
+def testDblQuad():
+    xa, xb, xc = 1., 1.1, -0.1
+    ya, yb, yc = 2., 2.2, 0.2
+    za, zb, zc = 3., 3.3, 0.5
+    dxb, dyb, dzb = xb - xa, yb - ya, zb - za
+    dxc, dyc, dzc = xc - xa, yc - ya, zc - za
+    def f(xsi, eta):
+        return xa + xsi*(xb - xa) + eta*(xc - xa)
+    def etaMin(xsi):
+        return 0.0
+    def etaMax(xsi):
+        return 1.0 - xsi
+    area = dyb * dzc - dyc * dzb
+    res = scipy.integrate.dblquad(f, 0., 1., etaMin, etaMax)[0] * area
+    print 'res = ', res
 
 if __name__ == '__main__': 
+    testDblQuad()
     test0()
     test1()
-    #test2()
+    test2()
     #test3()
