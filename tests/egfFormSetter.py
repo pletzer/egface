@@ -1,4 +1,5 @@
 import scipy.integrate
+import scipy.linalg
 import numpy
 import math
 import re
@@ -133,11 +134,12 @@ class FormSetter:
             # integration over tetrahedron
             for k, v in self.terms.items():
                 k0, k1, k2 = k
+                jac = [self.dVerts[0], self.dVerts[1], self.dVerts[2]]
                 det = scipy.linalg.det(jac)
                 v = re.sub('x', '(self.baseVert[0] + xsi*self.dVerts[0][0] + eta*self.dVerts[1][0] + zet*self.dVerts[2][0])', v)
                 v = re.sub('y', '(self.baseVert[1] + xsi*self.dVerts[0][1] + eta*self.dVerts[1][1] + zet*self.dVerts[2][1])', v)
-                v = re.sub('z', '(self.baseVert[2] + xsi*self.dVerts[0][2] + eta*self.dVerts[1][2] + zet*self.dVerts[2][2])', v)
-                self.funcXsiEtaZet = v
+                v = re.sub('z[^et]', '(self.baseVert[2] + xsi*self.dVerts[0][2] + eta*self.dVerts[1][2] + zet*self.dVerts[2][2])', v)
+                self.funcXsiEtaZetStr = v
                 def loEta(xsi):
                     return 0.0
                 def hiEta(xsi):
@@ -145,7 +147,7 @@ class FormSetter:
                 def loZet(xsi, eta):
                     return 0.0
                 def hiZet(xsi, eta):
-                    return 1.0 - xsi - eta             
+                    return 1.0 - xsi - eta
                 res += scipy.integrate.tplquad(self.funcXsiEtaZet, 0., 1., loEta, hiEta, loZet, hiZet)[0] * det
 
         else:
@@ -175,6 +177,13 @@ def test2():
     res = fs.evaluate()
     assert math.fabs(res - 0.0133333333333) < 1.e-8
 
+def test3():
+    fs = FormSetter(3)
+    fs.setExpression('x* dy ^ dz ^ dx')
+    fs.setElement([1., 2., 3.], [1.1, 2.2, 3.3], [-0.1, 0.2, 0.5], [0.2, 0.3, 1.4])
+    res = fs.evaluate()
+    assert math.fabs(res - 0.00366666666667) < 1.e-8
+
 def testDblQuad():
     xa, xb, xc = 1., 1.1, -0.1
     ya, yb, yc = 2., 2.2, 0.2
@@ -187,13 +196,43 @@ def testDblQuad():
         return 0.0
     def etaMax(xsi):
         return 1.0 - xsi
+
     area = dyb * dzc - dyc * dzb
+
     res = scipy.integrate.dblquad(f, 0., 1., etaMin, etaMax)[0] * area
-    print 'res = ', res
+    print 'testDblQuad res = ', res
+
+def testTplQuad():
+    xa, xb, xc, xd = 1., 1.1, -0.1, 0.2
+    ya, yb, yc, yd = 2., 2.2, 0.2, 0.3
+    za, zb, zc, zd = 3., 3.3, 0.5, 1.4
+
+    dxb, dyb, dzb = xb - xa, yb - ya, zb - za
+    dxc, dyc, dzc = xc - xa, yc - ya, zc - za
+    dxd, dyd, dzd = xd - xa, yd - ya, zd - za
+
+    def f(xsi, eta, zet):
+        return xa + xsi*(xb - xa) + eta*(xc - xa) + zet*(xd - xa)
+    def etaMin(xsi):
+        return 0.0
+    def etaMax(xsi):
+        return 1.0 - xsi
+    def zetMin(xsi, eta):
+        return 0.0
+    def zetMax(xsi, eta):
+        return 1.0 - xsi - eta
+
+    volume = dyb*(dzc*dxd - dzd*dxc) - dyc*(dzb*dxd - dzd*dxb) + dyd*(dzb*dxc - dzc*dxb)
+    vol2 = scipy.linalg.det([[dyb, dzb, dxb], [dyc, dzc, dxc], [dyd, dzd, dxd]])
+    assert math.fabs(volume - vol2) < 1.e-10
+
+    res = scipy.integrate.tplquad(f, 0., 1., etaMin, etaMax, zetMin, zetMax)[0] * volume
+    print 'test TplQuad res = ', res
 
 if __name__ == '__main__': 
     testDblQuad()
+    testTplQuad()
     test0()
     test1()
     test2()
-    #test3()
+    test3()
